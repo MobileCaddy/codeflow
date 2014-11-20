@@ -1,0 +1,26 @@
+{
+  "name": "mc-codeflow",
+  "version": "0.0.1",
+  "homepage": "https://github.com/MobileCaddy/codeflow",
+  "authors": [
+    "Todd Halfpenny", "Todd Halfpenny <todd@mobilecaddy.net>",
+  ],
+  "description": "Files to support CodeFlow development for MobileCaddy",
+  "license": "NONE",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:MobileCaddy/codeflow.git"
+  }
+  "private": false,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies" : {
+    "jquery": ">=2.0.0",
+    "underscore": ">=1.5.2",
+    "es6-promise": "http://s3.amazonaws.com/es6-promises/promise-1.0.0.min.js",
+    "forcejs": "https://github.com/toddhalfpenny/forcejs.git"
+  }
+}
