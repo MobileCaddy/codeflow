@@ -5,6 +5,13 @@
   "authors": [
     "Todd Halfpenny", "Todd Halfpenny <todd@mobilecaddy.net>"
   ],
+  "main": [
+    "js/mcOfflineDevSetup.min.js",
+    "js/mockVFRemote.js",
+    "js/MockCordova.js",
+    "js/MockCordova_SessStorage.js"
+    "js/MockSupportMc.min.js"
+  ],
   "description": "Files to support CodeFlow development for MobileCaddy",
   "license": "NONE",
   "repository": {
