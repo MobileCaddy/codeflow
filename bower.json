@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "homepage": "https://github.com/MobileCaddy/codeflow",
   "authors": [
-    "Todd Halfpenny", "Todd Halfpenny <todd@mobilecaddy.net>",
+    "Todd Halfpenny", "Todd Halfpenny <todd@mobilecaddy.net>"
   ],
   "description": "Files to support CodeFlow development for MobileCaddy",
   "license": "NONE",
