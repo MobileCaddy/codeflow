@@ -107,50 +107,43 @@ Visualforce.remoting.Manager = {};
 Visualforce.remoting.Manager = {
   invokeAction: function() {
   	// I'm assuming that the penultimate and last args are success and error callbacks.
-  	var callName = arguments[0];
+  	var callName = arguments[0].split(".").pop();
   	var success = arguments[arguments.length -2];
   	var error = arguments[arguments.length -1];
 		var resultObj = {};
   	var eventObj = {"status" : "OK"};
 
   	switch (callName) {
-  		case 'MobileCaddyDemoController001.getAudInfo' :
-  		case '.getAudInfo' :
+  		case 'getAudInfo' :
 				queryTestJsonFile('getAudInfo', function(data) {
 					success(data, eventObj);
 				});
 				break;
-  		case 'MobileCaddyDemoController001.getSystemDataSoupDefinition' :
-  		case '.getSystemDataSoupDefinition' :
+  		case 'getSystemDataSoupDefinition' :
 				queryTestJsonFile('getSystemDataSoupDefinition', function(data) {
 					success(data, eventObj);
 				});
 				break;
-  		case 'MobileCaddyDemoController001.getSysDataSoupVariables' :
-  		case '.getSysDataSoupVariables' :
+  		case 'getSysDataSoupVariables' :
 				resultObj = '[]';
     		success(resultObj, eventObj);
 				break;
-  		case 'MobileCaddyDemoController001.getDefsForSObjectMobileTables' :
-  		case '.getDefsForSObjectMobileTables' :
+  		case 'getDefsForSObjectMobileTables' :
 				queryTestJsonFile('getDefsForSObjectMobileTables', function(data) {
 					success(data, eventObj);
 				});
 				break;
-  		case 'MobileCaddyDemoController001.m2pCSStatusCheck' :
-  		case '.m2pCSStatusCheck' :
+  		case 'm2pCSStatusCheck' :
 				resultObj = '{"status" : "OK", "cs_fc_sc" : "Received Processed"}';
     		success(resultObj, eventObj);
 				break;
-  		case 'MobileCaddyDemoController001.p2mRefreshTable' :
-  		case '.p2mRefreshTable' :
+  		case 'p2mRefreshTable' :
 				console.log("mockVfRemote p2mRefreshTable -> " + arguments[3]);
 				queryTestJsonTableFile('p2mRefreshTable', arguments[3], function(data) {
 					success(data, eventObj);
 				});
 				break;
-			case 'MobileCaddyDemoController001.m2pUpdateTable' :
-  		case '.m2pUpdateTable' :
+  		case 'm2pUpdateTable' :
 				console.log("mockVfRemote m2pUpdateTable -> " + arguments[3]);
 				if ( arguments[3] == "Connection_Session__mc" ) {
 					// need to spoof response so app behaves OK

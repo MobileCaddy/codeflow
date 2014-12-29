@@ -1226,8 +1226,8 @@ var MockSmartStore = (function(window) {
         },
 
         upsertSoupEntries: function(soupName, entries, externalIdPath) {
-            //console.info('upsertSoupEntries, soupName -> ' + soupName + ', externalIdPath -> ' + externalIdPath);
-            //console.info('upsertSoupEntries, soupName -> ' + soupName + ', entries -> ' + JSON.stringify(entries) + ', externalIdPath -> ' + externalIdPath);
+            console.info('upsertSoupEntries, soupName -> ' + soupName + ', externalIdPath -> ' + externalIdPath);
+            console.info('upsertSoupEntries, soupName -> ' + soupName + ', entries -> ' + JSON.stringify(entries) + ', externalIdPath -> ' + externalIdPath);
             this.checkSoup(soupName);
             if (externalIdPath != "_soupEntryId" && !this.indexExists(soupName, externalIdPath))
                 throw new Error(soupName + " does not have an index on " + externalIdPath);
@@ -1300,7 +1300,9 @@ var MockSmartStore = (function(window) {
                     searchObj[externalIdPath] = entry[externalIdPath];
                     var entryExists = _.findWhere(soup, searchObj);
                     //console.debug('entryExists -> '+ JSON.stringify(entryExists));
-                    if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
+                    // what happens if I just remove this check?
+                    //if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
+                    if ( true )  {
                         // Id matches existing, if so replace rather than add
                         //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
                         soup = _.map(soup, function(el) {
