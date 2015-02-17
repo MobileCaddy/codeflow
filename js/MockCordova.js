@@ -590,7 +590,7 @@ cordova.define("salesforce/plugin/sfaccountmanager", function (require, exports,
 // For backward compatibility.
 var SFAccountManagerPlugin = cordova.require("salesforce/plugin/sfaccountmanager");
 
-cordova.define("salesforce/plugin/smartstore", function (require, exports, module) {
+cordova.define("com.salesforce.plugin.smartstore", function (require, exports, module) {
     var SERVICE = "com.salesforce.smartstore";
 
     var exec = require("salesforce/util/exec").exec;
@@ -1059,7 +1059,7 @@ module.exports = {
 
 
 // For backward compatibility
-navigator.smartstore = cordova.require("salesforce/plugin/smartstore");
+navigator.smartstore = cordova.require("com.salesforce.plugin.smartstore");
 navigator.camera = cordova.require("cordova/plugin/Camera");
 var SoupIndexSpec = navigator.smartstore.SoupIndexSpec;
 var QuerySpec = navigator.smartstore.QuerySpec;
@@ -1618,7 +1618,7 @@ var mockStore = new MockSmartStore();
 mockStore.hookToCordova(cordova);
 
 var myUrl = document.URL;
-var smartstore = cordova.require("salesforce/plugin/smartstore");
+var smartstore = cordova.require("com.salesforce.plugin.smartstore");
 if ( myUrl.indexOf("scrub=true") > -1 ) {
     for (var i = 0; i < localStorage.length; i++) {
         var name = localStorage.key( i );
