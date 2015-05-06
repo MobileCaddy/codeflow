@@ -29,8 +29,8 @@
  *    I N T E R N  A L    F U N C T I O N S
  *****************************************************/
 
-function queryTestJsonFile(remoteCall, success) {
-	myUri = "../../test/" + remoteCall + ".json";
+function queryMockJsonFile(remoteCall, success) {
+	myUri = "../../mock/" + remoteCall + ".json";
 	$j.ajax({
 		url: myUri,
 		success: function (data) {
@@ -43,8 +43,8 @@ function queryTestJsonFile(remoteCall, success) {
 		}
 	});
 }
-function queryTestJsonTableFile(remoteCall, tableName, success) {
-	myUri = "../../test/" + remoteCall + "/" + tableName + ".json";
+function queryMockJsonTableFile(remoteCall, tableName, success) {
+	myUri = "../../mock/" + remoteCall + "/" + tableName + ".json";
 	$j.ajax({
 		url: myUri,
 		success: function (data) {
@@ -58,6 +58,16 @@ function queryTestJsonTableFile(remoteCall, tableName, success) {
 	});
 }
 
+
+function makeid() {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for( var i=0; i < 18; i++ )
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
 
 /**
  * Builds a successful response for an m2pUpdate for Connection_Session_mc
@@ -74,17 +84,17 @@ function buildConnSessResp(inJson) {
 		return ({"Id" : idField.value,"sm" : null,"pc" : "U"});
 	});
 	return JSON.stringify({
-		"mt" : "Connection_Session__mc",
-		"cp" : inJson.connSessProxyId,
-		"csId" : "a0Mm0000000I9Q5EAK",
-		"ps" : "M2P UP - Record Processed",
+		"mt"   : "Connection_Session__mc",
+		"cp"   : inJson.connSessProxyId,
+		"csId" : makeid(),
+		"ps"   : "M2P UP - Record Processed",
 		"sdfb" : "D",
 		"hdfb" : "D",
 		"ufbe" : "K",
 		"stbe" : "D",
 		"ifbe" : "K",
-		"us" : us,
-		"uf" : []
+		"us"   : us,
+		"uf"   : []
 		});
 }
 
@@ -115,12 +125,12 @@ Visualforce.remoting.Manager = {
 
   	switch (callName) {
   		case 'getAudInfo' :
-				queryTestJsonFile('getAudInfo', function(data) {
+				queryMockJsonFile('getAudInfo', function(data) {
 					success(data, eventObj);
 				});
 				break;
   		case 'getSystemDataSoupDefinition' :
-				queryTestJsonFile('getSystemDataSoupDefinition', function(data) {
+				queryMockJsonFile('getSystemDataSoupDefinition', function(data) {
 					success(data, eventObj);
 				});
 				break;
@@ -129,7 +139,7 @@ Visualforce.remoting.Manager = {
     		success(resultObj, eventObj);
 				break;
   		case 'getDefsForSObjectMobileTables' :
-				queryTestJsonFile('getDefsForSObjectMobileTables', function(data) {
+				queryMockJsonFile('getDefsForSObjectMobileTables', function(data) {
 					success(data, eventObj);
 				});
 				break;
@@ -139,7 +149,7 @@ Visualforce.remoting.Manager = {
 				break;
   		case 'p2mRefreshTable' :
 				console.log("mockVfRemote p2mRefreshTable -> " + arguments[3]);
-				queryTestJsonTableFile('p2mRefreshTable', arguments[3], function(data) {
+				queryMockJsonTableFile('p2mRefreshTable', arguments[3], function(data) {
 					success(data, eventObj);
 				});
 				break;
@@ -150,7 +160,7 @@ Visualforce.remoting.Manager = {
 					var result = buildConnSessResp($j.parseJSON(arguments[4]));
 					success(result,eventObj);
 				} else {
-					queryTestJsonTableFile('m2pUpdateTable', arguments[3], function(data) {
+					queryMockJsonTableFile('m2pUpdateTable', arguments[3], function(data) {
 						success(data, eventObj);
 					});
 				}
