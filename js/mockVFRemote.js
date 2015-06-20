@@ -34,11 +34,24 @@ function queryMockJsonFile(remoteCall, success) {
 	$j.ajax({
 		url: myUri,
 		success: function (data) {
-			console.log("Read from file " + myUri + " OK -> " + angular.toJson(data));
-			 success(angular.toJson(data));
+			console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+			success(JSON.stringify(data));
 		},
 		error: function (e) {
-			console.log("Error reading from file" + myUri + " -> " + angular.toJson(e));
+			if ( e.status == 404){
+				myUri = "../../test/" + remoteCall + ".json";
+				$j.ajax({
+					url: myUri,
+					success: function (data) {
+						console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+						 success(JSON.stringify(data));
+					},
+					error: function (e) {
+						console.error("Error reading from file" + myUri + " -> " + JSON.stringify(e));
+						success([]);
+					}
+				});
+			}
 			success([]);
 		}
 	});
@@ -48,11 +61,25 @@ function queryMockJsonTableFile(remoteCall, tableName, success) {
 	$j.ajax({
 		url: myUri,
 		success: function (data) {
-			console.log("Read from file " + myUri + " OK -> " + angular.toJson(data));
-			 success(angular.toJson(data));
+			console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+			 success(JSON.stringify(data));
 		},
 		error: function (e) {
-			console.log("Error reading from file" + myUri + " -> " + angular.toJson(e));
+			if ( e.status == 404){
+				myUri = "../../test/" + remoteCall + "/" + tableName + ".json";
+				$j.ajax({
+					url: myUri,
+					success: function (data) {
+						console.info('data');
+						console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+						success(JSON.stringify(data));
+					},
+					error: function (e) {
+						console.error("Error reading from file" + myUri + " -> " + JSON.stringify(e));
+						success([]);
+					}
+				});
+			}
 			success([]);
 		}
 	});
@@ -76,26 +103,32 @@ function makeid() {
  */
 function buildConnSessResp(inJson) {
 	console.debug('inJson', JSON.stringify(inJson));
-	var inRecs = inJson.records;
-	console.debug('inRecs', JSON.stringify(inRecs));
-	var us = inRecs.map(function(rec) {
-		console.debug('rec', JSON.stringify(rec));
-		var idField = _.findWhere(rec.fields, {'name': "Id"});
-		return ({"Id" : idField.value,"sm" : null,"pc" : "U"});
-	});
-	return JSON.stringify({
-		"mt"   : "Connection_Session__mc",
-		"cp"   : inJson.connSessProxyId,
-		"csId" : makeid(),
-		"ps"   : "M2P UP - Record Processed",
-		"sdfb" : "D",
-		"hdfb" : "D",
-		"ufbe" : "K",
-		"stbe" : "D",
-		"ifbe" : "K",
-		"us"   : us,
-		"uf"   : []
+	try {
+		inJson = JSON.parse(inJson);
+		var inRecs = inJson.records;
+		console.debug('inRecs', JSON.stringify(inRecs));
+		var us = inRecs.map(function(rec) {
+			console.debug('rec', JSON.stringify(rec));
+			var idField = _.findWhere(rec.fields, {'name': "Id"});
+			return ({"Id" : idField.value,"sm" : null,"pc" : "U"});
 		});
+		return JSON.stringify({
+			"mt"   : "Connection_Session__mc",
+			"cp"   : inJson.connSessProxyId,
+			"csId" : makeid(),
+			"ps"   : "M2P UP - Record Processed",
+			"sdfb" : "D",
+			"hdfb" : "D",
+			"ufbe" : "K",
+			"stbe" : "D",
+			"ifbe" : "K",
+			"us"   : us,
+			"uf"   : []
+			});
+	} catch(err) {
+		console.error(err);
+		throw(err);
+	}
 }
 
 
@@ -144,6 +177,8 @@ Visualforce.remoting.Manager = {
 				});
 				break;
   		case 'm2pCSStatusCheck' :
+  			console.info('m2pCSStatusCheck - - - - - - - - - - - - - -');
+  			console.dir(arguments);
 				resultObj = '{"status" : "OK", "cs_fc_sc" : "Received Processed"}';
     		success(resultObj, eventObj);
 				break;
@@ -157,8 +192,12 @@ Visualforce.remoting.Manager = {
 				console.log("mockVfRemote m2pUpdateTable -> " + arguments[3]);
 				if ( arguments[3] == "Connection_Session__mc" ) {
 					// need to spoof response so app behaves OK
-					var result = buildConnSessResp($j.parseJSON(arguments[4]));
-					success(result,eventObj);
+					var result = buildConnSessResp(arguments[4]);
+					console.time('TODD');
+					setTimeout(function(){
+						console.timeEnd('TODD');
+						success(result,eventObj)
+						}, 500);
 				} else {
 					queryMockJsonTableFile('m2pUpdateTable', arguments[3], function(data) {
 						success(data, eventObj);

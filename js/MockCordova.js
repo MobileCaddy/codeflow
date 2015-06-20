@@ -1318,6 +1318,7 @@ var MockSmartStore = (function(window) {
                 //console.info('upsertSoupEntries, entry -> ' + JSON.stringify(entry));
                 // update/insert into soup
                 //soup[ entry._soupEntryId ] = entry;
+                entry._soupLastModifiedDate = new Date().valueOf();
                 upsertedEntries.push(entry);
                 //console.info('upsertSoupEntries, soup -> ' + JSON.stringify(soup));
                 //console.info('upsertSoupEntries, upsertedEntries -> ' + JSON.stringify(upsertedEntries));
