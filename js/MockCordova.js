@@ -80,7 +80,7 @@
         var exec = function(successCB, errorCB, service, action, args) {
             var version = (args.length > 0 && typeof args[0] == "string" && args[0].indexOf("pluginSDKVersion:") == 0 ? args[0].substring("pluginSDKVersion:".length) : null);
             if (version != null) { args.shift(); }
-            console.log("cordova.exec " + service + ":" + action + (version != null ? ":" + version : ""));
+            // console.log("cordova.exec " + service + ":" + action + (version != null ? ":" + version : ""));
             var found = false;
             var req = service + ":" + action;
             for (var key in interceptors) {
@@ -312,7 +312,7 @@ cordova.define("salesforce/util/exec", function(require, exports, module) {
             console.log(service + ":" + action + " succeeded");
         };
         var defaultErrorCB = function() {
-            console.error(service + ":" + action + " failed");
+            // console.error(service + ":" + action + " failed");
         };
         successCB = typeof successCB !== "function" ? defaultSuccessCB : successCB;
         errorCB = typeof errorCB !== "function" ? defaultErrorCB : errorCB;
@@ -790,7 +790,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
 
     //====== Cursor manipulation ======
     var moveCursorToPageIndex = function (cursor, newPageIndex, successCB, errorCB) {
-        console.log("moveCursorToPageIndex: " + cursor.cursorId + "  newPageIndex: " + newPageIndex);
+        //console.log("moveCursorToPageIndex: " + cursor.cursorId + "  newPageIndex: " + newPageIndex);
         exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
              "pgMoveCursorToPageIndex",
              [{"cursorId": cursor.cursorId, "index": newPageIndex}]
@@ -818,7 +818,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
     };
 
     var closeCursor = function (cursor, successCB, errorCB) {
-        console.log("closeCursor: " + cursor.cursorId);
+        //console.log("closeCursor: " + cursor.cursorId);
         exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
              "pgCloseCursor",
              [{"cursorId": cursor.cursorId}]
@@ -1226,63 +1226,41 @@ var MockSmartStore = (function(window) {
         },
 
         upsertSoupEntries: function(soupName, entries, externalIdPath) {
-            console.info('upsertSoupEntries, soupName -> ' + soupName + ', externalIdPath -> ' + externalIdPath);
-            console.info('upsertSoupEntries, soupName -> ' + soupName + ', entries -> ' + JSON.stringify(entries) + ', externalIdPath -> ' + externalIdPath);
+            // console.info('upsertSoupEntries, soupName -> ' + soupName + ', externalIdPath -> ' + externalIdPath);
+            // console.info('upsertSoupEntries, soupName -> ' + soupName + ', entries -> ' + JSON.stringify(entries) + ', externalIdPath -> ' + externalIdPath);
             this.checkSoup(soupName);
             if (externalIdPath != "_soupEntryId" && !this.indexExists(soupName, externalIdPath))
                 throw new Error(soupName + " does not have an index on " + externalIdPath);
 
             //var soup = _soups[soupName];
             var soup = JSON.parse(localStorage[soupName]);
-            //console.info('upsertSoupEntries, presoup -> ' + JSON.stringify(soup));
+            // console.info('upsertSoupEntries, presoup -> ' + JSON.stringify(soup));
             var upsertedEntries = [];
             for (var i=0; i<entries.length; i++) {
                 var entry = JSON.parse(JSON.stringify(entries[i])); // clone
                 var isNew = true;
+                var timeNow = new Date().valueOf();
 
-                 // upsert by external id
-                if (externalIdPath != "_soupEntryId") {
-                    //console.info('upsertSoupEntries, soupName -> ' + soupName + ', externalIdPath -> ' + externalIdPath + ', entries -> ' + JSON.stringify(entries));
-                    soup = _.map(soup, function(el) {
-                        if ( el[externalIdPath] == entry[externalIdPath] ) {
-                            return entry;
-                        } else {
-                            return el;
-                        }
-                    });
-                //     var externalId = this.project(entry, externalIdPath);
-                //     for (var soupEltId in soup) {
-                //         var soupElt = soup[soupEltId];
-                //         var projection = this.project(soupElt, externalIdPath);
-                //         if (projection == externalId) {
-                //             if (!isNew) {
-                //                 msg = "There are more than one soup elements where " + externalIdPath + " is " + externalId;
-                //                 console.error(msg);
-                //                 throw new Error(msg);
-                //             }
-                //             entry._soupEntryId = soupEltId;
-                //             isNew = false;
-                //         }
-                //     }
-                }
-
-                // create
                 if (!("_soupEntryId" in entry)) {
                     var searchObj = {};
                     searchObj[externalIdPath] = entry[externalIdPath];
                     var entryExists = _.findWhere(soup, searchObj);
-                    //console.debug('entryExists -> '+ JSON.stringify(entryExists));
+                    // console.debug('entryExists -> '+ JSON.stringify(entryExists));
                     if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
-                        // Id matches existing, if so replace rather than add
+                        // UPDATE
+                        // Id matches existing, if so update rather than add
                         //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
                         soup = _.map(soup, function(el) {
                             if ( el[externalIdPath] == entry[externalIdPath] ) {
-                                return entry;
+                                for (var attrname in entry) { el[attrname] = entry[attrname]; }
+                                el._soupLastModifiedDate = timeNow;
+                                return el;
                             } else {
                                 return el;
                             }
                         });
                     } else {
+                        // CREATE
                         var curMaxId = _.max(soup, function(el) {return el['_soupEntryId']});
                         if ( curMaxId == -Infinity ) {
                             curMaxId = 0;
@@ -1318,7 +1296,7 @@ var MockSmartStore = (function(window) {
                 //console.info('upsertSoupEntries, entry -> ' + JSON.stringify(entry));
                 // update/insert into soup
                 //soup[ entry._soupEntryId ] = entry;
-                entry._soupLastModifiedDate = new Date().valueOf();
+                entry._soupLastModifiedDate = timeNow;
                 upsertedEntries.push(entry);
                 //console.info('upsertSoupEntries, soup -> ' + JSON.stringify(soup));
                 //console.info('upsertSoupEntries, upsertedEntries -> ' + JSON.stringify(upsertedEntries));
@@ -1490,7 +1468,7 @@ var MockSmartStore = (function(window) {
                     }
                 }
                 else if (querySpec.queryType === "like") {
-                    console.info('querySoupFull like');
+                    // console.info('querySoupFull like');
                     if (projection.match(likeRegexp)) {
                         results.push(soupElt);
                     }
