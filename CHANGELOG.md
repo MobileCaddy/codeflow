@@ -8,6 +8,7 @@
 #### Features
 
 * A whole load of stuff... this is to filled out from our tickets
+* Moved CORS serve in to here
 
 #### Breaking Changes
 
