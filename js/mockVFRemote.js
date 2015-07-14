@@ -57,12 +57,14 @@ function queryMockJsonFile(remoteCall, success) {
 	});
 }
 function queryMockJsonTableFile(remoteCall, tableName, success) {
+	var timeNow = new Date().valueOf();
 	myUri = "../../mock/" + remoteCall + "/" + tableName + ".json";
 	$j.ajax({
 		url: myUri,
 		success: function (data) {
 			console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
-			 success(JSON.stringify(data));
+			if (data.lastRefreshDatetime) data.lastRefreshDatetime = timeNow;
+			success(JSON.stringify(data));
 		},
 		error: function (e) {
 			if ( e.status == 404){
@@ -72,6 +74,7 @@ function queryMockJsonTableFile(remoteCall, tableName, success) {
 					success: function (data) {
 						console.info('data');
 						console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+						if (data.lastRefreshDatetime) data.lastRefreshDatetime = timeNow;
 						success(JSON.stringify(data));
 					},
 					error: function (e) {
@@ -196,7 +199,7 @@ Visualforce.remoting.Manager = {
 					console.time('TODD');
 					setTimeout(function(){
 						console.timeEnd('TODD');
-						success(result,eventObj)
+						success(result,eventObj);
 						}, 500);
 				} else {
 					queryMockJsonTableFile('m2pUpdateTable', arguments[3], function(data) {

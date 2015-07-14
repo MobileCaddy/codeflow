@@ -1,14 +1,15 @@
-### 0.0.1-alpha.5 unstable (2015-06-20)
+### 0.0.1-alpha.5 unstable (2015-07-14)
 
 
 #### Bug Fixes
 
-* none
+* MockCordova fix for missing _soupEntryId field
+* MockCordova fix for missing _soupLastModifiedDate#
+* mockVFRemote refresh calls now have correctly updated refresh time
 
 #### Features
 
-* A whole load of stuff... this is to filled out from our tickets
-* Moved CORS serve in to here
+* Moved CORS server in to here
 
 #### Breaking Changes
 
