@@ -1,3 +1,20 @@
+### 0.0.2 unstable (2015-09-16)
+
+
+#### Bug Fixes
+
+* Updates following linting - naughty boy!
+
+#### Features
+
+* Support for _some_ smartQuery requests
+* Support for call to SDFC to create "New Install" record on run up
+
+#### Breaking Changes
+
+* none
+
+
 ### 0.0.1-alpha.5 unstable (2015-07-14)
 
 
