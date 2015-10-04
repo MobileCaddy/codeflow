@@ -1,0 +1,29 @@
+{
+  "name": "mobilecaddy-codeflow",
+  "version": "0.0.3",
+  "homepage": "https://github.com/MobileCaddy/mobilecaddy-codeflow",
+  "authors": [
+    "Todd Halfpenny", "Todd Halfpenny <todd@mobilecaddy.net>",
+    "Paul Tarpey", "Paul Tarpey <paul@mobilecaddy.net>"
+  ],
+  "main" :  [
+    "js/mcOfflineDevSetup.min.js",
+    "js/mockVFRemote.js",
+    "js/MockCordova.js",
+    "js/MockCordova_SessStorage.js",
+    "js/MockSupportMc.min.js"
+  ],
+  "description": "Files to support CodeFlow development for MobileCaddy",
+  "license": "NONE",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:MobileCaddy/codeflow.git"
+  },
+  "private": false,
+  "dependencies" : {
+    "jquery": ">=2.0.0",
+    "underscore": ">=1.5.2",
+    "es6-promise": "^1.0.0",
+    "forcejs": "https://github.com/toddhalfpenny/forcejs.git"
+  }
+}

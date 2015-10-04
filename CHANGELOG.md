@@ -1,4 +1,20 @@
-### 0.0.2 unstable (2015-09-16)
+### 0.0.3  (2015-10-04)
+
+
+#### Bug Fixes
+
+* None
+
+#### Features
+
+* NPM Support
+
+#### Breaking Changes
+
+* none
+
+
+### 0.0.2  (2015-09-25)
 
 
 #### Bug Fixes
