@@ -28,6 +28,10 @@
  * Mock Cordova: mocks just enough cordova functions to allow testing of plugins outside a container
  *
  */
+
+
+var $j = jQuery.noConflict();
+
 (function(window) {
     var require,
     define;
@@ -1170,7 +1174,9 @@ var MockSmartStore = (function(window) {
 
         soupExists: function(soupName) {
             // return _soups[soupName] !== undefined;
-            if ( localStorage[soupName] ) {
+            var soupExistsRes = localStorage.getItem(soupName);
+            console.log("soupExists", soupExistsRes);
+            if (soupExistsRes) {
                 //console.info("soupExists true -> " + soupName);
                 return true;
             } else {
@@ -1191,7 +1197,7 @@ var MockSmartStore = (function(window) {
             //     }
             // }
             // return false;
-            var soupIndexSpecs = JSON.parse(localStorage.soupIndexSpecs);
+            var soupIndexSpecs = JSON.parse(localStorage.getItem('soupIndexSpecs'));
             var indexSpecs = _.findWhere(soupIndexSpecs, {'soup': soupName});
             if (indexSpecs !== undefined) { return true;} else {return false;}
         },
@@ -1200,13 +1206,13 @@ var MockSmartStore = (function(window) {
             if (!this.soupExists(soupName)) {
                 // _soups[soupName] = {};
                 // _soupIndexSpecs[soupName] = indexSpecs;
-                localStorage[soupName] = JSON.stringify([]);
+                localStorage.setItem(soupName, JSON.stringify([]));
                 if (!this.soupExists('soupIndexSpecs')) {
-                    localStorage.soupIndexSpecs = JSON.stringify([]);
+                    localStorage.setItem('soupIndexSpecs', JSON.stringify([]));
                 }
-                var soupIndexSpecs = JSON.parse(localStorage.soupIndexSpecs);
+                var soupIndexSpecs = JSON.parse(localStorage.getItem('soupIndexSpecs'));
                 soupIndexSpecs.push({'soup': soupName, 'indexSpecs' :indexSpecs});
-                localStorage.soupIndexSpecs = JSON.stringify(soupIndexSpecs);
+                localStorage.setItem('soupIndexSpecs', JSON.stringify(soupIndexSpecs));
             }
             return soupName;
         },
@@ -1214,15 +1220,13 @@ var MockSmartStore = (function(window) {
         removeSoup: function(soupName) {
             localStorage.removeItem(soupName);
             if (this.soupExists('soupIndexSpecs')) {
-                var soupIndexSpecs = JSON.parse(localStorage.soupIndexSpecs);
-                soupIndexSpecs = _.reject(soupIndexSpecs, function(el) {
+                var soupIndexSpecs = JSON.parse(localStorage.getItem('soupIndexSpecs'));
+                var soupIndexSpecs1a = JSON.parse(soupIndexSpecs);
+                soupIndexSpecs = _.reject(soupIndexSpecs1a, function(el) {
                     return el.soup == soupName;
                 });
-                localStorage.soupIndexSpecs = JSON.stringify(soupIndexSpecs);
+                localStorage.setItem('soupIndexSpecs', JSON.stringify(soupIndexSpecs));
             }
-            // delete _soups[soupName];
-            // delete _soupIndexSpecs[soupName];
-            // delete _nextSoupEltIds[soupName];
         },
 
         upsertSoupEntries: function(soupName, entries, externalIdPath) {
@@ -1233,7 +1237,7 @@ var MockSmartStore = (function(window) {
                 throw new Error(soupName + " does not have an index on " + externalIdPath);
 
             //var soup = _soups[soupName];
-            var soup = JSON.parse(localStorage[soupName]);
+            var soup = JSON.parse(localStorage.getItem(soupName));
             // console.info('upsertSoupEntries, presoup -> ' + JSON.stringify(soup));
             var upsertedEntries = [];
             for (var i=0; i<entries.length; i++) {
@@ -1275,11 +1279,9 @@ var MockSmartStore = (function(window) {
                         soup.push(entry);
                     }
                 } else { // UPDATE
+                    searchObj = {};
                     searchObj[externalIdPath] = entry[externalIdPath];
                     entryExists = _.findWhere(soup, searchObj);
-                    //console.debug('entryExists -> '+ JSON.stringify(entryExists));
-                    // what happens if I just remove this check?
-                    //if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
                     if ( true )  {
                         // Id matches existing, if so replace rather than add
                         //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
@@ -1293,15 +1295,10 @@ var MockSmartStore = (function(window) {
                     }
                 }
 
-                //console.info('upsertSoupEntries, entry -> ' + JSON.stringify(entry));
-                // update/insert into soup
-                //soup[ entry._soupEntryId ] = entry;
                 entry._soupLastModifiedDate = timeNow;
                 upsertedEntries.push(entry);
-                //console.info('upsertSoupEntries, soup -> ' + JSON.stringify(soup));
-                //console.info('upsertSoupEntries, upsertedEntries -> ' + JSON.stringify(upsertedEntries));
             }
-            localStorage[soupName] = JSON.stringify(soup);
+            localStorage.setItem(soupName, JSON.stringify(soup));
             return upsertedEntries;
         },
 
@@ -1309,7 +1306,7 @@ var MockSmartStore = (function(window) {
             this.checkSoup(soupName);
             //var soup = _soups[soupName];
             var entries = [];
-            var soup = JSON.parse(localStorage[soupName]);
+            var soup = JSON.parse(localStorage.getItem(soupName));
             soup = _.reject(soup, function(el) {
                 if ( entryIds.indexOf(el._soupEntryId) == -1 ){
                     return false;
@@ -1327,7 +1324,7 @@ var MockSmartStore = (function(window) {
         removeFromSoup: function(soupName, entryIds) {
             this.checkSoup(soupName);
             //var soup = _soups[soupName];
-            var soup = JSON.parse(localStorage[soupName]);
+            var soup = JSON.parse(localStorage.getItem(soupName));
             soup = _.reject(soup, function(el) {
                 if ( entryIds.indexOf(el._soupEntryId) == -1 ){
                     return false;
@@ -1340,7 +1337,7 @@ var MockSmartStore = (function(window) {
             //     console.debug('removeFromSoup: ->  -> entryId' + entryId);
             //     delete soup[entryId];
             // }
-            localStorage[soupName] = JSON.stringify(soup);
+            localStorage.setItem(soupName, JSON.stringify(soup));
         },
 
         project: function(soupElt, path) {
@@ -1515,7 +1512,7 @@ var MockSmartStore = (function(window) {
             this.checkSoup(soupName);
             this.checkIndex(soupName, querySpec.indexPath);
             //var soup = _soups[soupName];
-            var soup = JSON.parse(localStorage[soupName]);
+            var soup = JSON.parse(localStorage.getItem(soupName));
             var results = [];
             var likeRegexp = (querySpec.likeKey ? new RegExp("^" + querySpec.likeKey.replace(/%/g, ".*"), "i") : null);
             for (var soupEntryId in soup) {
@@ -1567,7 +1564,6 @@ var MockSmartStore = (function(window) {
             _cursors[cursorId] = cursor;
             return cursor;
         },
-
 
         runSmartQuery: function(querySpec){
             var results = this.smartQuerySoupFull(querySpec);
@@ -1680,7 +1676,8 @@ mockStore.hookToCordova(cordova);
 var myUrl = document.URL;
 var smartstore = cordova.require("com.salesforce.plugin.smartstore");
 if ( myUrl.indexOf("scrub=true") > -1 ) {
-    for (var i = 0; i < localStorage.length; i++) {
+    var numTables = localStorage.length;
+    for (var i = 0; i < numTables; i++) {
         var name = localStorage.key( i );
         if ( name != 'forceOAuth' ) {
             smartstore.removeSoup(name);
@@ -1688,7 +1685,8 @@ if ( myUrl.indexOf("scrub=true") > -1 ) {
     }
 }
 if ( myUrl.indexOf("scrub=full") > -1 ) {
-    for (var i = 0; i < localStorage.length; i++) {
+    var numTables = localStorage.length;
+    for (var i = 0; i < numTables; i++) {
         var name = localStorage.key( i );
         smartstore.removeSoup(name);
     }

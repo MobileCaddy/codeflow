@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "homepage": "https://github.com/MobileCaddy/codeflow",
   "author": "MobileCaddy",
-  "main" :  [
+  "main": [
     "js/mcOfflineDevSetup.min.js",
     "js/mockVFRemote.js",
     "js/MockCordova.js",
@@ -17,10 +17,11 @@
     "url": "git@github.com:MobileCaddy/codeflow.git"
   },
   "preferGlobal": false,
-  "dependencies" : {
+  "dependencies": {
     "jquery": ">=2.0.0",
     "underscore": ">=1.5.2",
     "es6-promise": "^1.0.0",
-    "forcejs": "git+https://github.com/toddhalfpenny/forcejs.git"
+    "forcejs": "git+https://github.com/toddhalfpenny/forcejs.git",
+    "angular-ui-grid": "^3.0.7"
   }
 }

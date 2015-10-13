@@ -23,7 +23,7 @@ angular.module('starter', ['ionic', 'ui.grid', 'ui.grid.resizeColumns',  'starte
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
 
-    .state('app', {
+    .state('app2', {
     url: '/app',
     abstract: true,
     templateUrl: 'templates/menu.html',
