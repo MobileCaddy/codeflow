@@ -29,9 +29,6 @@
  *
  */
 
-
-var $j = jQuery.noConflict();
-
 (function(window) {
     var require,
     define;

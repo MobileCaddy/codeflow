@@ -1,0 +1,58 @@
+// Ionic overrides
+
+$positive:              #004576;
+$assertive:             #6982A8;
+$item-divider-bg:       #4BF0FF;
+$list-header-color:     #caecd3;
+$button-light-border:   #64A8EE;
+
+@import "ionic/ionic";
+
+h1, h2, h3, h4, h5, h6, h7,
+.menu a.item-content {
+  font-family: "Raleway", "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
+}
+
+.label {
+  color: gray;
+  font-style: italic;
+  margin-right: 0.5em;
+}
+
+table {
+  width: 100%;
+}
+td {
+  width: 20%;
+}
+
+.conn-sess .succ {
+  color: green;
+}
+
+.conn-sess.fail, .conn-sess .fail {
+  color: red;
+}
+
+.animate-repeat {
+  line-height:40px;
+  list-style:none;
+  box-sizing:border-box;
+}
+
+.animate-repeat.ng-enter {
+  -webkit-transition:all linear 3s;
+  transition:all linear 1.5s;
+}
+
+.animate-repeat.ng-enter {
+  opacity:0.6;
+  max-height:0;
+  background: #3CAD5D;
+}
+
+.animate-repeat.ng-enter.ng-enter-active {
+  opacity:1;
+  max-height:40px;
+  background: #fff;
+}

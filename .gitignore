@@ -1,2 +1,10 @@
 *.log
-node_modules/
+.sass-cache
+node_modules
+
+// GENERATED BITS BY 'GRUNT DEVSETUP'
+codeflow-app/lib
+codeflow-app/fonts
+codeflow-app/scss/ionic
+codeflow-app/css
+oauthcallback.html
