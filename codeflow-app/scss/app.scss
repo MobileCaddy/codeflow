@@ -19,12 +19,21 @@ h1, h2, h3, h4, h5, h6, h7,
   margin-right: 0.5em;
 }
 
+
 table {
   width: 100%;
 }
 td {
   width: 20%;
 }
+
+
+.buttons-right span.username{
+  margin: 0.58em 1em 0 0;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
 
 .conn-sess .succ {
   color: green;

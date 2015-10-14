@@ -14,6 +14,11 @@ angular.module('starter.controllers', [])
     curUserName = "",
     instanceId = "",
     orgId = "";
+
+  $scope.log = {};
+  $scope.log.level = (localStorage.getItem('logLevel')) ? localStorage.getItem('logLevel') : "";
+  console.debug('$scope.log.level', $scope.log.level);
+
   DashService.getAppDetails().then(function(appDetails){
     $scope.appName = appDetails.name;
     $scope.appDesc = appDetails.description;
@@ -238,7 +243,19 @@ angular.module('starter.controllers', [])
     if (type == "full") localStorage.removeItem('forceOAuth');
     var win = window.open("http://localhost:3030/www/#/app/home",'myApp');
     win.location.reload();
-  }
+  };
+
+  /**
+   * Sets the current loggin level in the app
+   */
+  $scope.logLevelChange = function(){
+    console.debug('$scope.log.level', $scope.log.level);
+    if (!$scope.log.level) {
+      localStorage.removeItem('logLevel');
+    } else {
+      localStorage.setItem('logLevel', $scope.log.level);
+    }
+  };
 
 })
 

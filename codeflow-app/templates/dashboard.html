@@ -1,4 +1,8 @@
 <ion-view view-title="Codeflow Dashboard">
+  <ion-nav-buttons side="right">
+    <span class="username">{{username}}</span>
+    </a>
+  </ion-nav-buttons>
   <ion-content padding='true'>
     <div class="row">
       <div class="col col-66">
@@ -8,14 +12,26 @@
         <p><span class="label">Logged In:</span>{{loggedIn}}</p>
       </div>
       <div class="col">
-        <button class="button button-block" ng-click="scrub('partial')" >Partial Scrub (not oAuth)</button>
-        <button class="button button-block" ng-click="scrub('full')" >Full Scrub</button>
-        <button class="button button-block" disabled>Populate Mock Data</button>
+        <button class="button button-block" ng-click="scrub('partial')" ng-disabled="!loggedIn" >Partial Scrub</button>
+        <button class="button button-block" ng-click="scrub('full')" ng-disabled="!loggedIn" >Full Scrub (oAuth)</button>
+        <form name="logLevelForm" ng-disabled="!loggedIn">
+          <label class="item item-input item-select">
+            <div class="input-label">
+              Log Level:
+            </div>
+            <select required ng-model="log.level" ng-change="logLevelChange()">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="">Off</option>
+            </select>
+          </label>
+        </form>
         <button class="button button-block button-assertive" disabled>Deploy</button>
       </div>
     </div>
     <h2>Latest Connection Sessions</h2>
-    <button class="button button-small {{pollingClass}}" ng-click="togglePolling()"  ng-disabled="!loggedIn">{{pollingLabel}}</button>
+    <button class="button button-small {{pollingClass}}" ng-click="togglePolling()" ng-disabled="!loggedIn">{{pollingLabel}}</button>
       <table>
          <thead>
             <tr>
