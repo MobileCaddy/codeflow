@@ -6,5 +6,4 @@ node_modules
 codeflow-app/lib
 codeflow-app/fonts
 codeflow-app/scss/ionic
-codeflow-app/css
 oauthcallback.html
