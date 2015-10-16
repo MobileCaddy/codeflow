@@ -12,8 +12,8 @@
         <p><span class="label">Logged In:</span>{{loggedIn}}</p>
       </div>
       <div class="col">
-        <button class="button button-block" ng-click="scrub('partial')" ng-disabled="!loggedIn" >Partial Scrub</button>
-        <button class="button button-block" ng-click="scrub('full')" ng-disabled="!loggedIn" >Full Scrub (oAuth)</button>
+        <button class="button button-block" ng-click="scrub('partial')">Partial Scrub</button>
+        <button class="button button-block" ng-click="scrub('full')">Full Scrub (oAuth)</button>
         <form name="logLevelForm" ng-disabled="!loggedIn">
           <label class="item item-input item-select">
             <div class="input-label">
