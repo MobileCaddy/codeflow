@@ -6,7 +6,7 @@
     'LastModifiedById',
     'LastModifiedDate',
     'LastReferencedDate',
-    'mc_package_002__MC_Proxy_ID__c',
+    'mobilecaddy1__MC_Proxy_ID__c',
     'OwnerId',
     'SystemModstamp',
     'RecordTypeId',
