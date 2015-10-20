@@ -1679,17 +1679,19 @@ mockStore.hookToCordova(cordova);
 
 var myUrl = document.URL;
 var smartstore = cordova.require("com.salesforce.plugin.smartstore");
+var numTables = localStorage.length;
+
 if ( myUrl.indexOf("scrub=true") > -1 ) {
-    for (var i = 0; i < localStorage.length; i++) {
+    for (var i = (numTables -1); i >= 0 ; i--) {
         var name = localStorage.key( i );
         if ( name != 'forceOAuth' ) {
             smartstore.removeSoup(name);
         }
     }
 }
+
 if ( myUrl.indexOf("scrub=full") > -1 ) {
-    for (var i = 0; i < localStorage.length; i++) {
-        var name = localStorage.key( i );
+    for (var i = (numTables -1); i >= 0 ; i--) {
         smartstore.removeSoup(name);
     }
 }

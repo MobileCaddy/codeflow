@@ -1,0 +1,16 @@
+<ion-view view-title="Codeflow Table Inpector - {{table.Name}}">
+	<ion-nav-title>
+     Table: {{table.Name}}
+    </ion-nav-title>
+  <ion-content padding="true">
+  	<h2>Table Definition</h2>
+  	<p><span class="label">Table Name:</span>{{table.Name}}</p>
+  	<p><span class="label">CRUD:</span>{{table.CRUD}}</p>
+  	<p><span class="label">Sync Type:</span>{{table.SyncType}}</p>
+  	<h2>Fields</h2>
+    <div id="fieldGrid" ui-grid="fieldGridOptions" class="myGrid" ui-grid-resize-columns></div>
+  	<h2>Table Content</h2>
+    <div id="recGrid" ui-grid="recGridOptions" class="myGrid" ui-grid-resize-columns></div>
+	</div>
+  </ion-content>
+</ion-view>

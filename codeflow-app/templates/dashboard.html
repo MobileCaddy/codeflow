@@ -1,0 +1,73 @@
+<ion-view view-title="Codeflow Dashboard">
+  <ion-nav-buttons side="right">
+    <span class="username">{{username}}</span>
+    </a>
+  </ion-nav-buttons>
+  <ion-content padding='true'>
+    <div class="row">
+      <div class="col col-66">
+        <h2><span class='label'>App:</span>{{appName}}</h2>
+        <p>{{appDesc}}</p>
+        <p><span class="label">Version:</span>{{appVersion}}</p>
+        <p><span class="label">Logged In:</span>{{loggedIn}}</p>
+        <p><span class="label">Last GIT Commit:</span><span class="gitCommitMsg">{{gitCommitMsg}}</span></p>
+      </div>
+      <div class="col">
+        <button class="button button-block" ng-click="scrub('partial')">Partial Scrub</button>
+        <button class="button button-block" ng-click="scrub('full')">Full Scrub (oAuth)</button>
+        <form name="logLevelForm" ng-disabled="!loggedIn">
+          <label class="item item-input item-select">
+            <div class="input-label">
+              Log Level:
+            </div>
+            <select required ng-model="log.level" ng-change="logLevelChange()">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="">Off</option>
+            </select>
+          </label>
+        </form>
+        <button class="button button-block button-assertive" disabled>Deploy</button>
+      </div>
+    </div>
+    <h2>Latest Connection Sessions</h2>
+    <button class="button button-small {{pollingClass}}" ng-click="togglePolling()" ng-disabled="!loggedIn">{{pollingLabel}}</button>
+      <table>
+         <thead>
+            <tr>
+              <td class="name">Name</td>
+              <td class="lastModified">Last Modified</td>
+              <td>User
+                <label class="item item-input">
+                  <i class="icon ion-search placeholder-icon"></i>
+                  <input type="text" ng-model="csFilter.UsersName"  ng-disabled="!loggedIn"/>
+                </label>
+                <!--<ion-toggle toggle-class="toggle-assertive"
+                    ng-model="usernameFilter.checked"
+                    ng-change="usernameFilterChange()">
+              <input type="search" ng-model="csFilter" />-->
+              </td>
+              <td>Type</td>
+              <td>Table
+                <label class="item item-input">
+                  <i class="icon ion-search placeholder-icon"></i>
+                  <input type="text" ng-model="csFilter.Mobile_Table_Name__c"  ng-disabled="!loggedIn" />
+                </label></td>
+            </tr>
+          </th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="csRec in csRecs| orderBy: '-Name'| filter:csFilter"
+              class="animate-repeat conn-sess {{csRec.rowClass}}" >
+            <td><a target="_blank" href="{{instanceUrl}}/{{csRec.Id}}">{{csRec.Name}}</a></td>
+            <td>{{csRec.LastModifiedDate | date:'yyyy/MM/dd HH:mm:ss'}}</td>
+            <td>{{csRec.UsersName}}</td>
+            <td><i class="icon {{csRec.SessionIconClass}}"></i>&nbsp; {{csRec.Session_Type__c}} <span class="succ">{{csRec.totalSucc}}</span>:<span class="fail">{{csRec.totalFail}}</span></td>
+            <td>{{csRec.Mobile_Table_Name__c}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="button button-small button-positive" ng-click="loadOlder()" ng-disabled="!loggedIn">Load Older</button>
+  </ion-content>
+</ion-view>

@@ -1,3 +1,19 @@
+### 1.0.0  (2015-10-16)
+
+
+#### Bug Fixes
+
+* Scrubbing was not clearing all tables in all scenarios. Should now work
+
+#### Features
+
+* NONE
+
+#### Breaking Changes
+
+* Use on packages only containing 'mobilecaddy1' namespace
+
+
 ### 0.0.3  (2015-10-04)
 
 

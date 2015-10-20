@@ -136,7 +136,7 @@
 			// TODO : 'LastViewedDate' - should this be local field that can be updated
 			// explicitly (for 'recent items' type usage)
 			//'LastViewedDate',
-			'mc_package_002__MC_Proxy_ID',
+			'mobilecaddy1__MC_Proxy_ID',
 			'MC_Proxy_ID',
 			'OwnerId',
 			'SystemModstamp',
