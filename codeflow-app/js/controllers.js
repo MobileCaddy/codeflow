@@ -7,7 +7,7 @@ angular.module('starter.controllers', [])
   });
 })
 
-.controller('DashCtrl', function($scope, $timeout, $ionicLoading, csService, userService, DashService) {
+.controller('DashCtrl', function($scope, userService, DashService) {
   var appName = "",
     appVsn = "",
     gitStatus ="",
@@ -23,15 +23,15 @@ angular.module('starter.controllers', [])
     $scope.appName = appDetails.name;
     $scope.appDesc = appDetails.description;
     $scope.appVersion = appDetails.version;
-    $scope.$apply();
+    $scope.$digest();
     return DashService.getGitInfo();
   }).then(function(gitInfo){
     $scope.gitCommitMsg = gitInfo.gitCommitMsg;
-    $scope.$apply();
+    $scope.$digest();
   }).catch(function(e){
     console.error(e);
     $scope.gitCommitMsg = "-";
-    $scope.$apply();
+    $scope.$digest();
   });
 
 
@@ -68,175 +68,33 @@ angular.module('starter.controllers', [])
   isLoggedIn = force.isLoggedIn();
   $scope.loggedIn = isLoggedIn;
 
-  $scope.csFilter = "";
   $scope.usernameFilter =  {checked : false};
 
-  // Conn-sess stuff
   if (isLoggedIn) {
     $scope.userId = force.getUserId();
-
-    $scope.instanceUrl = JSON.parse(localStorage.getItem('forceOAuth')).instance_url;
-
-    sessionStorage.removeItem('latestCsName');
-    $scope.pollingLabel = "Start";
-    $scope.pollingClass = "button-balanced";
-    $scope.pollingStatus = 0;
 
     userService.getUser($scope.userId).then(function(response){
       $scope.usersName = response.Name;
       $scope.username = response.Username;
-      $scope.$apply();
+      $scope.$digest();
       return getMcNamespace();
     }).then(function(sfNamespace){
       sessionStorage.setItem('sfNamespace', sfNamespace);
       $scope.sfNamespace = sfNamespace;
-      $scope.$apply();
+      $scope.$digest();
       return userService.getUser($scope.userId);
     }).then(function(response){
         $scope.usersName = response.Name;
         $scope.username = response.Username;
-        $scope.$apply();
+        $scope.$digest();
     }).catch(function(e){
       console.error(e);
       $scope.usersName = "-";
       $scope.username = "-";
-      $scope.$apply();
+      $scope.$digest();
     });
 
-    var formatCsRec = function(el){
-      return new Promise(function(resolve, reject) {
-        var iconClass = "";
-        switch (el[$scope.sfNamespace + '__Session_Type__c']) {
-          case "Sync - Refresh" :
-            iconClass = "ion-ios-cloud-download-outline";
-            break;
-          case "Sync - Update" :
-            iconClass = "ion-ios-cloud-upload-outline";
-            break;
-          case "New Install":
-            iconClass = "ion-ios-plus-outline";
-            break;
-          default :
-            iconClass = "ion-oops";
-            break;
-        }
-        el.SessionIconClass = iconClass;
-        if (el[$scope.sfNamespace + '__Session_Type__c'] == "Sync - Update") {
-          var totalFail = el[$scope.sfNamespace + '__Insert_Failure_Duplication_Count__c'] +
-                          el[$scope.sfNamespace + '__Insert_Failure_Match_Failures_Count__c'] +
-                          el[$scope.sfNamespace + '__Insert_Failures_Count__c'] +
-                          el[$scope.sfNamespace + '__Update_Failure_Match_Failures_Count__c'] +
-                          el[$scope.sfNamespace + '__Soft_Delete_Update_Count__c'] +
-                          el[$scope.sfNamespace + '__Update_Failures_Count__c'];
-          var totalSucc = el[$scope.sfNamespace + '__Insert_Successes_Count__c'] +
-                          el[$scope.sfNamespace + '__Update_Successes_Count__c'] ;
-          if (totalFail > 0) {
-            el.rowClass = "fail";
-          }
-          el.totalFail = totalFail;
-          el.totalSucc = totalSucc;
-        }
-        el.Mobile_Table_Name__c = el[$scope.sfNamespace + '__Mobile_Table_Name__c'];
-        el.Session_Type__c = el[$scope.sfNamespace + '__Session_Type__c'];
-        if (typeof(el.CreatedById) == "undefined") {
-          // console.log("el CreatedById== undefined-> ", JSON.stringify(el));
-          resolve(el);
-        } else {
-          userService.getUser(el.CreatedById).then(function(userRec){
-            el.UsersName = userRec.Name;
-            // console.log("el -> ", JSON.stringify(el));
-            resolve(el);
-          }).catch(function(e){
-            console.error(e);
-            resolve(el);
-          });
-        }
-      });
-    };
-
-    $scope.csRecs = [];
-    var poll = function() {
-        if ($scope.csRecs.length > 0) $ionicLoading.hide();
-        $timeout(function() {
-            if ($scope.pollingStatus == 1) {
-              csService.getLatest().then(function(res){
-                //console.debug('res ', res);
-                $ionicLoading.hide();
-                if (res.length > 0) {
-                  // res.forEach(function(el){
-                  //   el2 = formatCsRec(el);
-                  //   $scope.csRecs.unshift(el2);
-                  // });
-
-                  var sequence = Promise.resolve();
-                  res.forEach(function(el){
-                    sequence = sequence.then(function() {
-                      // TODO CHECK IF WE ALREADY HAVE THIS - SF IS RETURNING
-                      // RECS WE ALREADY HAVE.
-                      return formatCsRec(el);
-                    }).then(function(el2){
-                      $scope.csRecs.unshift(el2);
-                      $scope.$apply();
-                    });
-                  });
-                }
-              });
-              poll();
-            }
-        }, 3000);
-    };
-    poll();
-
-    $scope.togglePolling = function(){
-      if ($scope.pollingStatus === 0 ){
-        $ionicLoading.show({
-          duration: 30000,
-          delay : 400,
-          maxWidth: 600,
-          noBackdrop: true,
-          template: '<h1>Loading...</h1><p id="app-progress-msg" class="item-icon-left">Fetching Connection Sessions...<ion-spinner/></p>'
-        });
-        poll();
-        $scope.pollingStatus = 1;
-        $scope.pollingLabel = "Stop";
-        $scope.pollingClass = "button-assertive";
-      } else  {
-        $scope.pollingStatus = 0;
-        $scope.pollingLabel = "Start";
-        $scope.pollingClass = "button-balanced";
-      }
-    };
-
-    $scope.loadOlder = function() {
-      var tempList = _.sortBy($scope.csRecs, 'Name');
-      var oldest = tempList[0];
-      // console.log('oldest', oldest);
-      csService.getOlder(oldest).then(function(res){
-        var sequence = Promise.resolve();
-        res.forEach(function(el){
-          sequence = sequence.then(function() {
-            return formatCsRec(el);
-          }).then(function(el2){
-            $scope.csRecs.unshift(el2);
-            $scope.$apply();
-          });
-        });
-      });
-    };
-
-    $scope.usernameFilterChange = function(){
-      console.log("usernameFilterChange", $scope.usernameFilter.checked);
-      if ($scope.usernameFilter.checked) {
-        $scope.csFilter = $scope.usersName;
-      } else {
-        $scope.csFilter = "";
-      }
-    };
-  } else {
-    // Not Logged In
-    $scope.pollingLabel = "Start";
   }
-
 
   /**
    * Scrubs localStorage tables
@@ -264,6 +122,160 @@ angular.module('starter.controllers', [])
       localStorage.removeItem('logLevel');
     } else {
       localStorage.setItem('logLevel', $scope.log.level);
+    }
+  };
+
+})
+
+.controller('ConnSessCtrl', function($scope, $timeout, $ionicLoading, csService, userService){
+
+  $scope.csFilter = "";
+
+  var isLoggedIn = force.isLoggedIn();
+  if (isLoggedIn) {
+
+    $scope.instanceUrl = JSON.parse(localStorage.getItem('forceOAuth')).instance_url;
+
+    sessionStorage.removeItem('latestCsName');
+    $scope.pollingLabel = "Start";
+    $scope.pollingClass = "button-balanced";
+    $scope.pollingStatus = 0;
+  } else {
+    // Not Logged In
+    $scope.pollingLabel = "Start";
+    $scope.pollingStatus = null;
+  }
+
+
+  var formatCsRec = function(el){
+
+    $scope.myVal = 1;
+    return new Promise(function(resolve, reject) {
+
+      var iconClass = "";
+      switch (el[$scope.sfNamespace + '__Session_Type__c']) {
+        case "Sync - Refresh" :
+          iconClass = "ion-ios-cloud-download-outline";
+          break;
+        case "Sync - Update" :
+          iconClass = "ion-ios-cloud-upload-outline";
+          break;
+        case "New Install":
+          iconClass = "ion-ios-plus-outline";
+          break;
+        default :
+          iconClass = "ion-oops";
+          break;
+      }
+      el.SessionIconClass = iconClass;
+      if (el[$scope.sfNamespace + '__Session_Type__c'] == "Sync - Update") {
+        var totalFail = el[$scope.sfNamespace + '__Insert_Failure_Duplication_Count__c'] +
+                        el[$scope.sfNamespace + '__Insert_Failure_Match_Failures_Count__c'] +
+                        el[$scope.sfNamespace + '__Insert_Failures_Count__c'] +
+                        el[$scope.sfNamespace + '__Update_Failure_Match_Failures_Count__c'] +
+                        el[$scope.sfNamespace + '__Soft_Delete_Update_Count__c'] +
+                        el[$scope.sfNamespace + '__Update_Failures_Count__c'];
+        var totalSucc = el[$scope.sfNamespace + '__Insert_Successes_Count__c'] +
+                        el[$scope.sfNamespace + '__Update_Successes_Count__c'] ;
+        if (totalFail > 0) {
+          el.rowClass = "fail";
+        }
+        el.totalFail = totalFail;
+        el.totalSucc = totalSucc;
+      }
+      el.Mobile_Table_Name__c = el[$scope.sfNamespace + '__Mobile_Table_Name__c'];
+      el.Session_Type__c = el[$scope.sfNamespace + '__Session_Type__c'];
+      if (typeof(el.CreatedById) == "undefined") {
+        // console.log("el CreatedById== undefined-> ", JSON.stringify(el));
+        resolve(el);
+      } else {
+        userService.getUser(el.CreatedById).then(function(userRec){
+          el.UsersName = userRec.Name;
+          // console.log("el -> ", JSON.stringify(el));
+          resolve(el);
+        }).catch(function(e){
+          console.error(e);
+          resolve(el);
+        });
+      }
+    });
+  };
+
+  $scope.csRecs = [];
+  var poll = function() {
+    $scope.myVal  = 0;
+      if ($scope.csRecs.length > 0) $ionicLoading.hide();
+      $timeout(function() {
+          if ($scope.pollingStatus == 1) {
+            csService.getLatest().then(function(res){
+              //console.debug('res ', res);
+              $ionicLoading.hide();
+              if (res.length > 0) {
+                var sequence = Promise.resolve();
+                res.forEach(function(el){
+                  var match = _.findWhere($scope.csRecs, {Name: el.Name});
+                  if (!match) {
+                    sequence = sequence.then(function() {
+                      return formatCsRec(el);
+                    }).then(function(el2){
+                      $scope.csRecs.unshift(el2);
+                      $scope.$digest();
+                    });
+                  } else {
+                    console.debug('SF sent duplicate', el.Name);
+                  }
+                });
+              }
+            });
+            poll();
+          }
+      }, 3000);
+  };
+  poll();
+
+  $scope.togglePolling = function(){
+    if ($scope.pollingStatus === 0 ){
+      $ionicLoading.show({
+        duration: 30000,
+        delay : 400,
+        maxWidth: 600,
+        noBackdrop: true,
+        template: '<h1>Loading...</h1><p id="app-progress-msg" class="item-icon-left">Fetching Connection Sessions...<ion-spinner/></p>'
+      });
+      poll();
+      $scope.pollingStatus = 1;
+      $scope.pollingLabel = "Stop";
+      $scope.pollingClass = "button-assertive";
+    } else  {
+      $scope.pollingStatus = 0;
+      $scope.pollingLabel = "Start";
+      $scope.pollingClass = "button-balanced";
+    }
+  };
+
+  $scope.loadOlder = function() {
+    var tempList = _.sortBy($scope.csRecs, 'Name');
+    var oldest = tempList[0];
+    // console.log('oldest', oldest);
+    csService.getOlder(oldest).then(function(res){
+      var sequence = Promise.resolve();
+      res.forEach(function(el){
+        sequence = sequence.then(function() {
+          return formatCsRec(el);
+        }).then(function(el2){
+          $scope.csRecs.unshift(el2);
+          $scope.$digest();
+        });
+      });
+    });
+  };
+
+  $scope.usernameFilterChange = function(){
+    console.log("usernameFilterChange", $scope.usernameFilter.checked);
+    if ($scope.usernameFilter.checked) {
+      $scope.csFilter = $scope.usersName;
+    } else {
+      $scope.csFilter = "";
     }
   };
 
@@ -306,7 +318,7 @@ angular.module('starter.controllers', [])
   TableService.getRecords($stateParams.tableName).then(function(tableRecs){
     $scope.tableRecs = tableRecs;
     $scope.recGridOptions.data = tableRecs;
-    $scope.$apply();
+    $scope.$digest();
   });
 
 });
