@@ -229,7 +229,7 @@ angular.module('starter.controllers', [])
             });
             poll();
           }
-      }, 3000);
+      }, 3000, false);
   };
   poll();
 

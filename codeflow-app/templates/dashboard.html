@@ -1,13 +1,13 @@
 <ion-view view-title="Codeflow Dashboard">
   <ion-nav-buttons side="right">
-    <span class="username">{{username}}</span>
+    <span class="username">{{:: username}}</span>
     </a>
   </ion-nav-buttons>
   <ion-content padding='true'>
     <div class="row">
       <div class="col col-66">
-        <h2><span class='label'>App:</span>{{appName}}</h2>
-        <p>{{appDesc}}</p>
+        <h2><span class='label'>App:</span>{{:: appName}}</h2>
+        <p>{{:: appDesc}}</p>
         <p><span class="label">Version:</span>{{appVersion}}</p>
         <p><span class="label">Logged In:</span>{{loggedIn}}</p>
         <p><span class="label">Last GIT Commit:</span><span class="gitCommitMsg">{{gitCommitMsg}}</span></p>
@@ -33,7 +33,7 @@
     </div>
     <div ng-controller="ConnSessCtrl">
       <h2>Latest Connection Sessions</h2>
-      <button class="button button-small {{pollingClass}}" ng-click="togglePolling()" ng-disabled="!loggedIn">{{pollingLabel}}</button>
+      <button id="toggleScroll" class="button button-small {{pollingClass}}" ng-click="togglePolling()" ng-disabled="!loggedIn">{{pollingLabel}}</button>
       <table>
          <thead>
             <tr>
@@ -60,12 +60,12 @@
         </thead>
         <tbody>
           <tr ng-repeat="csRec in csRecs| orderBy: '-Name'| filter:csFilter"
-              class="animate-repeat conn-sess {{csRec.rowClass}}" >
-            <td><a target="_blank" href="{{instanceUrl}}/{{csRec.Id}}">{{csRec.Name}}</a></td>
-            <td>{{csRec.LastModifiedDate | date:'yyyy/MM/dd HH:mm:ss'}}</td>
-            <td>{{csRec.UsersName}}</td>
-            <td><i class="icon {{csRec.SessionIconClass}}"></i>&nbsp; {{csRec.Session_Type__c}} <span class="succ">{{csRec.totalSucc}}</span>:<span class="fail">{{csRec.totalFail}}</span></td>
-            <td>{{csRec.Mobile_Table_Name__c}}</td>
+              class="animate-repeat conn-sess {{:: csRec.rowClass}}" >
+            <td><a target="_blank" href="{{:: instanceUrl}}/{{:: csRec.Id}}">{{:: csRec.Name}}</a></td>
+            <td>{{:: csRec.LastModifiedDate | date:'yyyy/MM/dd HH:mm:ss'}}</td>
+            <td>{{:: csRec.UsersName}}</td>
+            <td><i class="icon {{:: csRec.SessionIconClass}}"></i>&nbsp; {{:: csRec.Session_Type__c}} <span class="succ">{{:: csRec.totalSucc}}</span>:<span class="fail">{{:: csRec.totalFail}}</span></td>
+            <td>{{:: csRec.Mobile_Table_Name__c}}</td>
           </tr>
         </tbody>
       </table>
