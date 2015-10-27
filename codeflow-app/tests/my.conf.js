@@ -19,6 +19,8 @@ module.exports = function(config) {
       '../js/*.js',
       '../../node_modules/es6-promise/dist/promise-1.0.0.js',
       '../../node_modules/angular-mocks/angular-mocks.js',
+      '../../node_modules/underscore/underscore-min.js',
+      '../../node_modules/forcejs/force.js',
       '**/*tests.js'
     ],
 

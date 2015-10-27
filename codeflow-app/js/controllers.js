@@ -147,60 +147,6 @@ angular.module('starter.controllers', [])
   }
 
 
-  var formatCsRec = function(el){
-
-    $scope.myVal = 1;
-    return new Promise(function(resolve, reject) {
-
-      var iconClass = "";
-      switch (el[$scope.sfNamespace + '__Session_Type__c']) {
-        case "Sync - Refresh" :
-          iconClass = "ion-ios-cloud-download-outline";
-          break;
-        case "Sync - Update" :
-          iconClass = "ion-ios-cloud-upload-outline";
-          break;
-        case "New Install":
-          iconClass = "ion-ios-plus-outline";
-          break;
-        default :
-          iconClass = "ion-oops";
-          break;
-      }
-      el.SessionIconClass = iconClass;
-      if (el[$scope.sfNamespace + '__Session_Type__c'] == "Sync - Update") {
-        var totalFail = el[$scope.sfNamespace + '__Insert_Failure_Duplication_Count__c'] +
-                        el[$scope.sfNamespace + '__Insert_Failure_Match_Failures_Count__c'] +
-                        el[$scope.sfNamespace + '__Insert_Failures_Count__c'] +
-                        el[$scope.sfNamespace + '__Update_Failure_Match_Failures_Count__c'] +
-                        el[$scope.sfNamespace + '__Soft_Delete_Update_Count__c'] +
-                        el[$scope.sfNamespace + '__Update_Failures_Count__c'];
-        var totalSucc = el[$scope.sfNamespace + '__Insert_Successes_Count__c'] +
-                        el[$scope.sfNamespace + '__Update_Successes_Count__c'] ;
-        if (totalFail > 0) {
-          el.rowClass = "fail";
-        }
-        el.totalFail = totalFail;
-        el.totalSucc = totalSucc;
-      }
-      el.Mobile_Table_Name__c = el[$scope.sfNamespace + '__Mobile_Table_Name__c'];
-      el.Session_Type__c = el[$scope.sfNamespace + '__Session_Type__c'];
-      if (typeof(el.CreatedById) == "undefined") {
-        // console.log("el CreatedById== undefined-> ", JSON.stringify(el));
-        resolve(el);
-      } else {
-        userService.getUser(el.CreatedById).then(function(userRec){
-          el.UsersName = userRec.Name;
-          // console.log("el -> ", JSON.stringify(el));
-          resolve(el);
-        }).catch(function(e){
-          console.error(e);
-          resolve(el);
-        });
-      }
-    });
-  };
-
   $scope.csRecs = [];
   var poll = function() {
     $scope.myVal  = 0;
@@ -211,15 +157,22 @@ angular.module('starter.controllers', [])
               //console.debug('res ', res);
               $ionicLoading.hide();
               if (res.length > 0) {
+                $scope.myVal  = 9;
                 var sequence = Promise.resolve();
                 res.forEach(function(el){
+                $scope.myVal  = 8;
                   var match = _.findWhere($scope.csRecs, {Name: el.Name});
                   if (!match) {
+                    $scope.myVal  = 7;
                     sequence = sequence.then(function() {
+                      $scope.myVal  = 6;
                       return formatCsRec(el);
                     }).then(function(el2){
+                      $scope.myVal  = 5;
                       $scope.csRecs.unshift(el2);
                       $scope.$digest();
+                    }).catch(function(e){
+                      $scope.myVal  = 4;
                     });
                   } else {
                     console.debug('SF sent duplicate', el.Name);

@@ -3,7 +3,12 @@ var underscore = angular.module('underscore', []);
     return window._; // assumes underscore has already been loaded on the page
   });
 
-angular.module('starter.services', ['underscore'])
+angular.module('force', [])
+  .factory('force', function() {
+  return window.force;
+});
+
+angular.module('starter.services', ['underscore', 'force'])
 
 /*
  * D A S H B O A R D
@@ -141,7 +146,10 @@ angular.module('starter.services', ['underscore'])
 })
 
 
-.factory('csService', [ function(){
+/*
+ * C O N N    S E R S S I O N S
+ */
+.factory('csService', ['force', function(force){
 
 
   function forceQuery(soql){
@@ -157,6 +165,62 @@ angular.module('starter.services', ['underscore'])
       );
     });
   }
+
+
+  var formatCsRec = function(el){
+
+    $scope.myVal = 1;
+    return new Promise(function(resolve, reject) {
+
+      var iconClass = "";
+      switch (el[$scope.sfNamespace + '__Session_Type__c']) {
+        case "Sync - Refresh" :
+          iconClass = "ion-ios-cloud-download-outline";
+          break;
+        case "Sync - Update" :
+          iconClass = "ion-ios-cloud-upload-outline";
+          break;
+        case "New Install":
+          iconClass = "ion-ios-plus-outline";
+          break;
+        default :
+          iconClass = "ion-oops";
+          break;
+      }
+      el.SessionIconClass = iconClass;
+      if (el[$scope.sfNamespace + '__Session_Type__c'] == "Sync - Update") {
+        var totalFail = el[$scope.sfNamespace + '__Insert_Failure_Duplication_Count__c'] +
+                        el[$scope.sfNamespace + '__Insert_Failure_Match_Failures_Count__c'] +
+                        el[$scope.sfNamespace + '__Insert_Failures_Count__c'] +
+                        el[$scope.sfNamespace + '__Update_Failure_Match_Failures_Count__c'] +
+                        el[$scope.sfNamespace + '__Soft_Delete_Update_Count__c'] +
+                        el[$scope.sfNamespace + '__Update_Failures_Count__c'];
+        var totalSucc = el[$scope.sfNamespace + '__Insert_Successes_Count__c'] +
+                        el[$scope.sfNamespace + '__Update_Successes_Count__c'] ;
+        if (totalFail > 0) {
+          el.rowClass = "fail";
+        }
+        el.totalFail = totalFail;
+        el.totalSucc = totalSucc;
+      }
+      el.Mobile_Table_Name__c = el[$scope.sfNamespace + '__Mobile_Table_Name__c'];
+      el.Session_Type__c = el[$scope.sfNamespace + '__Session_Type__c'];
+      if (typeof(el.CreatedById) == "undefined") {
+        // console.log("el CreatedById== undefined-> ", JSON.stringify(el));
+        resolve(el);
+      } else {
+        userService.getUser(el.CreatedById).then(function(userRec){
+          el.UsersName = userRec.Name;
+          // console.log("el -> ", JSON.stringify(el));
+          resolve(el);
+        }).catch(function(e){
+          console.error(e);
+          resolve(el);
+        });
+      }
+    });
+  };
+
 
   function getLatest() {
     return new Promise(function(resolve, reject) {
@@ -183,6 +247,21 @@ angular.module('starter.services', ['underscore'])
         // console.debug('res', res);
         if ( res.totalSize > 0 ) {
           sessionStorage.setItem('latestCsName', res.records[0].Name);
+          // var sequence = Promise.resolve();
+          // res.forEach(function(el){
+          //   var match = _.findWhere($scope.csRecs, {Name: el.Name});
+          //   if (!match) {
+          //     sequence = sequence.then(function() {
+          //       return formatCsRec(el);
+          //     }).then(function(el2){
+          //       $scope.csRecs.unshift(el2);
+          //       $scope.$digest();
+          //     }).catch(function(e){
+          //     });
+          //   } else {
+          //     console.debug('SF sent duplicate', el.Name);
+          //   }
+          // });
           resolve(res.records);
         } else {
           resolve([]);
@@ -223,7 +302,38 @@ angular.module('starter.services', ['underscore'])
     });
   }
 
+  function testForceQuery() {
+    return new Promise(function(resolve, reject) {
+      resolve("333");
+      // force.query("123",
+      //   function(response) {
+      //     resolve(response);
+      //   },
+      //   function(e) {
+      //     console.error("An error has occurred.", e);
+      //     reject("err");
+      //   }
+      // );
+    });
+  }
+
+  function myTest(){
+    return new Promise(function(resolve, reject) {
+      var sfNamespace =  sessionStorage.getItem('sfNamespace');
+      forceQuery().then(function(res){
+        resolve(res);
+      }).catch(function(e){
+        console.error(e);
+        resolve(e);
+      });
+      //resolve(sfNamespace);
+    });
+  }
+
   return {
+    test: function(){
+      return myTest();
+    },
     getLatest: function(){
       return getLatest();
     },
