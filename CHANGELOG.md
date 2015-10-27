@@ -1,3 +1,20 @@
+### 1.0.1  (2015-10-27)
+
+
+#### Bug Fixes
+
+* Removed erroneous _main_ pair from package.json (caused issue on latest node)
+
+#### Features
+
+* NONE
+
+#### Breaking Changes
+
+* NONE
+
+
+
 ### 1.0.0  (2015-10-16)
 
 
