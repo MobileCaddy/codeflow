@@ -13,6 +13,19 @@ angular.module('starter.services', ['underscore', 'force'])
 /*
  * D A S H B O A R D
  */
+.factory('forceService', function(){
+
+  return {
+    query: function(a,b,c) {
+      b("vvv");
+    }
+  }
+})
+
+
+/*
+ * D A S H B O A R D
+ */
 .factory('DashService', function($rootScope, $http, $timeout){
 
   /**
@@ -302,38 +315,8 @@ angular.module('starter.services', ['underscore', 'force'])
     });
   }
 
-  function testForceQuery() {
-    return new Promise(function(resolve, reject) {
-      resolve("333");
-      // force.query("123",
-      //   function(response) {
-      //     resolve(response);
-      //   },
-      //   function(e) {
-      //     console.error("An error has occurred.", e);
-      //     reject("err");
-      //   }
-      // );
-    });
-  }
-
-  function myTest(){
-    return new Promise(function(resolve, reject) {
-      var sfNamespace =  sessionStorage.getItem('sfNamespace');
-      forceQuery().then(function(res){
-        resolve(res);
-      }).catch(function(e){
-        console.error(e);
-        resolve(e);
-      });
-      //resolve(sfNamespace);
-    });
-  }
 
   return {
-    test: function(){
-      return myTest();
-    },
     getLatest: function(){
       return getLatest();
     },

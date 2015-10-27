@@ -24,6 +24,7 @@ module.exports = function(config) {
       '**/*tests.js'
     ],
 
+    // client.captureConsole: true,
 
     // list of files to exclude
     exclude: [

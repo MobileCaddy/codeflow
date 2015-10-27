@@ -1,15 +1,8 @@
 {
   "name": "mobilecaddy-codeflow",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/MobileCaddy/codeflow",
   "author": "MobileCaddy",
-  "main": [
-    "js/mcOfflineDevSetup.min.js",
-    "js/mockVFRemote.js",
-    "js/MockCordova.js",
-    "js/MockCordova_SessStorage.js",
-    "js/MockSupportMc.min.js"
-  ],
   "description": "Files to support CodeFlow development for MobileCaddy",
   "license": "NONE",
   "repository": {
