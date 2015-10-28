@@ -35,6 +35,7 @@ describe('ConnSessCtrl', function(){
     ionicLoadingMock = jasmine.createSpyObj('$ionicLoading spy', ['show', 'hide']);
 
     scope = $rootScope.$new();
+
     controller = $controller('ConnSessCtrl', {
       $scope: scope,
       $ionicLoading : ionicLoadingMock,
@@ -50,7 +51,7 @@ describe('ConnSessCtrl', function(){
       $rootScope = _$rootScope_;
     }));
 
-    xit('should have a correct initial state function', function() {
+    it('should have a correct initial state function', function() {
       expect(scope.pollingLabel).toEqual('Start');
       expect(scope.pollingStatus).toEqual(0);
       expect(scope.csRecs).toEqual([]);
@@ -59,34 +60,24 @@ describe('ConnSessCtrl', function(){
 
   describe('conn sess toggle on', function() {
 
-    beforeEach(inject(function(_$rootScope_, _$timeout_) {
+    beforeEach(inject(function(_$rootScope_) {
       $rootScope = _$rootScope_;
-      $timeout = _$timeout_;
       scope.sfNamespace = "";
       scope.togglePolling();
     }));
 
-    xit('should have a correct initial state function', function(done) {
+    it('should have a correct initial state function', function() {
       expect(scope.pollingLabel).toEqual('Stop');
       expect(scope.pollingStatus).toEqual(1);
-      $timeout.flush();
       expect(mockCsService.getLatest).toHaveBeenCalledWith();
-      $timeout.flush();
-      $rootScope.$digest();
-      // TODO Not sure how to handle promises within the controller itself.
-      // HMMMMMMMmmmmmmmmm.......
-      // deferredGetLatest.resolve([{'a':1}]);
-      // $timeout.flush();
-      // //$rootScope.$digest();
-      // expect(scope.csRecs).toEqual([1]);
-      // expect(scope.myVal).toEqual([2]);
-
-      deferredGetLatest.resolve([{'a':1}]);
-      $rootScope.$apply();
-      expect(scope.csRecs).toEqual([1]);
-      expect(scope.myVal).toEqual([2]);
-      done();
     });
+
+    it('should update the scope.csRecs', function(){
+      var myServiceResp = [{"attributes":{"type":"mobilecaddy1__Connection_Session__c","url":"/services/data/v30.0/sobjects/mobilecaddy1__Connection_Session__c/a0A2400000HyTQIEA3"},"Id":"a0A2400000HyTQIEA3","CreatedById":"00524000000EnWoAAK","Name":"CNS-0000087","mobilecaddy1__Session_Type__c":"Sync - Update","mobilecaddy1__Mobile_Table_Name__c":"Connection_Session__mc","mobilecaddy1__Insert_Failure_Duplication_Count__c":0,"mobilecaddy1__Insert_Failure_Match_Failures_Count__c":0,"mobilecaddy1__Insert_Failures_Count__c":0,"mobilecaddy1__Insert_Successes_Count__c":0,"mobilecaddy1__Soft_Delete_Update_Count__c":0,"mobilecaddy1__Update_Failure_Match_Failures_Count__c":0,"mobilecaddy1__Update_Failures_Count__c":0,"mobilecaddy1__Update_Successes_Count__c":2,"LastModifiedDate":"2015-10-27T14:58:36.000+0000","SessionIconClass":"ion-ios-cloud-upload-outline","totalFail":0,"totalSucc":2,"Mobile_Table_Name__c":"Connection_Session__mc","Session_Type__c":"Sync - Update","UsersName":"Todd Halfpenny"}]
+      deferredGetLatest.resolve(myServiceResp);
+      $rootScope.$digest();
+      expect(scope.csRecs[0].Name).toEqual("CNS-0000087");
+    })
 
   });
 

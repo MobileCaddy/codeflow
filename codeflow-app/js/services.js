@@ -10,18 +10,6 @@ angular.module('force', [])
 
 angular.module('starter.services', ['underscore', 'force'])
 
-/*
- * D A S H B O A R D
- */
-.factory('forceService', function(){
-
-  return {
-    query: function(a,b,c) {
-      b("vvv");
-    }
-  }
-})
-
 
 /*
  * D A S H B O A R D
@@ -162,7 +150,7 @@ angular.module('starter.services', ['underscore', 'force'])
 /*
  * C O N N    S E R S S I O N S
  */
-.factory('csService', ['force', function(force){
+.factory('csService', ['force', 'userService', function(force, userService){
 
 
   function forceQuery(soql){
@@ -182,11 +170,11 @@ angular.module('starter.services', ['underscore', 'force'])
 
   var formatCsRec = function(el){
 
-    $scope.myVal = 1;
+    var sfNamespace =  sessionStorage.getItem('sfNamespace');
     return new Promise(function(resolve, reject) {
 
       var iconClass = "";
-      switch (el[$scope.sfNamespace + '__Session_Type__c']) {
+      switch (el[sfNamespace + '__Session_Type__c']) {
         case "Sync - Refresh" :
           iconClass = "ion-ios-cloud-download-outline";
           break;
@@ -201,30 +189,28 @@ angular.module('starter.services', ['underscore', 'force'])
           break;
       }
       el.SessionIconClass = iconClass;
-      if (el[$scope.sfNamespace + '__Session_Type__c'] == "Sync - Update") {
-        var totalFail = el[$scope.sfNamespace + '__Insert_Failure_Duplication_Count__c'] +
-                        el[$scope.sfNamespace + '__Insert_Failure_Match_Failures_Count__c'] +
-                        el[$scope.sfNamespace + '__Insert_Failures_Count__c'] +
-                        el[$scope.sfNamespace + '__Update_Failure_Match_Failures_Count__c'] +
-                        el[$scope.sfNamespace + '__Soft_Delete_Update_Count__c'] +
-                        el[$scope.sfNamespace + '__Update_Failures_Count__c'];
-        var totalSucc = el[$scope.sfNamespace + '__Insert_Successes_Count__c'] +
-                        el[$scope.sfNamespace + '__Update_Successes_Count__c'] ;
+      if (el[sfNamespace + '__Session_Type__c'] == "Sync - Update") {
+        var totalFail = el[sfNamespace + '__Insert_Failure_Duplication_Count__c'] +
+                        el[sfNamespace + '__Insert_Failure_Match_Failures_Count__c'] +
+                        el[sfNamespace + '__Insert_Failures_Count__c'] +
+                        el[sfNamespace + '__Update_Failure_Match_Failures_Count__c'] +
+                        el[sfNamespace + '__Soft_Delete_Update_Count__c'] +
+                        el[sfNamespace + '__Update_Failures_Count__c'];
+        var totalSucc = el[sfNamespace + '__Insert_Successes_Count__c'] +
+                        el[sfNamespace + '__Update_Successes_Count__c'] ;
         if (totalFail > 0) {
           el.rowClass = "fail";
         }
         el.totalFail = totalFail;
         el.totalSucc = totalSucc;
       }
-      el.Mobile_Table_Name__c = el[$scope.sfNamespace + '__Mobile_Table_Name__c'];
-      el.Session_Type__c = el[$scope.sfNamespace + '__Session_Type__c'];
+      el.Mobile_Table_Name__c = el[sfNamespace + '__Mobile_Table_Name__c'];
+      el.Session_Type__c = el[sfNamespace + '__Session_Type__c'];
       if (typeof(el.CreatedById) == "undefined") {
-        // console.log("el CreatedById== undefined-> ", JSON.stringify(el));
         resolve(el);
       } else {
         userService.getUser(el.CreatedById).then(function(userRec){
           el.UsersName = userRec.Name;
-          // console.log("el -> ", JSON.stringify(el));
           resolve(el);
         }).catch(function(e){
           console.error(e);
@@ -234,6 +220,18 @@ angular.module('starter.services', ['underscore', 'force'])
     });
   };
 
+  function filterAndStoreCS(recs) {
+    var filteredCs = [];
+    recs.forEach(function(el){
+      if (sessionStorage.getItem(el.Name)) {
+        console.debug('SFDC sent a duplicate', el.Name);
+      } else {
+        sessionStorage.setItem(el.Name, JSON.stringify(el));
+        filteredCs.push(el);
+      }
+    });
+    return filteredCs;
+  }
 
   function getLatest() {
     return new Promise(function(resolve, reject) {
@@ -257,28 +255,15 @@ angular.module('starter.services', ['underscore', 'force'])
         q = 'select Id, CreatedById, Name, ' + csSessType + ',' + csTableName + ',' + csIFD + ',' + csIFM + ',' + csIF + ',' + csIS + ',' + csSDUF + ',' + csUFM + ',' + csUF + ',' + csUS + ', LastModifiedDate from ' + csSobject + ' ORDER BY Name DESC LIMIT 5';
       }
       forceQuery(q).then(function(res){
-        // console.debug('res', res);
         if ( res.totalSize > 0 ) {
           sessionStorage.setItem('latestCsName', res.records[0].Name);
-          // var sequence = Promise.resolve();
-          // res.forEach(function(el){
-          //   var match = _.findWhere($scope.csRecs, {Name: el.Name});
-          //   if (!match) {
-          //     sequence = sequence.then(function() {
-          //       return formatCsRec(el);
-          //     }).then(function(el2){
-          //       $scope.csRecs.unshift(el2);
-          //       $scope.$digest();
-          //     }).catch(function(e){
-          //     });
-          //   } else {
-          //     console.debug('SF sent duplicate', el.Name);
-          //   }
-          // });
-          resolve(res.records);
+          return Promise.all(res.records.map(formatCsRec));
         } else {
-          resolve([]);
+          console.debug('no entries');
+          return Promise.resolve([]);
         }
+      }).then(function(res){
+        resolve(filterAndStoreCS(res));
       }).catch(function(e){
         console.error(e);
         reject(e);
@@ -304,10 +289,12 @@ angular.module('starter.services', ['underscore', 'force'])
       forceQuery(q).then(function(res){
         // console.debug('res', res);
         if ( res.totalSize > 0 ) {
-          resolve(res.records);
+          return Promise.all(res.records.map(formatCsRec));
         } else {
           resolve([]);
         }
+      }).then(function(res){
+        resolve(filterAndStoreCS(res));
       }).catch(function(e){
         console.error(e);
         reject(e);

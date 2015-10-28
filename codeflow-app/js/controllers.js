@@ -15,6 +15,30 @@ angular.module('starter.controllers', [])
     instanceId = "",
     orgId = "";
 
+  /*
+    P O L L I N G
+   */
+  $scope.pollingStatus = 0;
+
+  $scope.$on('togglePolling', function (event, data) {
+    $scope.pollingStatus = data;
+  });
+
+  $scope.$on('$ionicView.enter', function(){
+    console.debug('enter', $scope.pollingStatus);
+    if ($scope.pollingStatus == 1){
+      $scope.$broadcast('resumePolling');
+    }
+  });
+
+  $scope.$on('$ionicView.beforeLeave', function(){
+    console.debug('beforeLeave', $scope.pollingStatus);
+    if ($scope.pollingStatus == 1){
+      $scope.$broadcast('pausePolling');
+    }
+  });
+
+
   $scope.log = {};
   $scope.log.level = (localStorage.getItem('logLevel')) ? localStorage.getItem('logLevel') : "";
   console.debug('$scope.log.level', $scope.log.level);
@@ -149,42 +173,24 @@ angular.module('starter.controllers', [])
 
   $scope.csRecs = [];
   var poll = function() {
-    $scope.myVal  = 0;
+    if ($scope.pollingStatus == 1) {
       if ($scope.csRecs.length > 0) $ionicLoading.hide();
-      $timeout(function() {
-          if ($scope.pollingStatus == 1) {
-            csService.getLatest().then(function(res){
-              //console.debug('res ', res);
-              $ionicLoading.hide();
-              if (res.length > 0) {
-                $scope.myVal  = 9;
-                var sequence = Promise.resolve();
-                res.forEach(function(el){
-                $scope.myVal  = 8;
-                  var match = _.findWhere($scope.csRecs, {Name: el.Name});
-                  if (!match) {
-                    $scope.myVal  = 7;
-                    sequence = sequence.then(function() {
-                      $scope.myVal  = 6;
-                      return formatCsRec(el);
-                    }).then(function(el2){
-                      $scope.myVal  = 5;
-                      $scope.csRecs.unshift(el2);
-                      $scope.$digest();
-                    }).catch(function(e){
-                      $scope.myVal  = 4;
-                    });
-                  } else {
-                    console.debug('SF sent duplicate', el.Name);
-                  }
-                });
-              }
-            });
-            poll();
-          }
-      }, 3000, false);
+
+      csService.getLatest().then(function(res){
+        $ionicLoading.hide();
+        if (res.length > 0) {
+          res.forEach(function(el){
+            $scope.csRecs.unshift(el);
+          });
+          // removed the digest as it caused issues in testing... seems to work
+          //$scope.$digest();
+        }
+        $timeout(function() {poll();}, 3000, false);
+      });
+    } else {
+      $timeout.cancel();
+    }
   };
-  poll();
 
   $scope.togglePolling = function(){
     if ($scope.pollingStatus === 0 ){
@@ -195,16 +201,31 @@ angular.module('starter.controllers', [])
         noBackdrop: true,
         template: '<h1>Loading...</h1><p id="app-progress-msg" class="item-icon-left">Fetching Connection Sessions...<ion-spinner/></p>'
       });
-      poll();
       $scope.pollingStatus = 1;
       $scope.pollingLabel = "Stop";
       $scope.pollingClass = "button-assertive";
+      $scope.$emit('togglePolling', 1);
+      poll();
     } else  {
       $scope.pollingStatus = 0;
       $scope.pollingLabel = "Start";
       $scope.pollingClass = "button-balanced";
+      $scope.$emit('togglePolling', 0);
     }
   };
+
+  /*
+    Broadcast from parent - sets toggling when we enter/leave the page
+   */
+  $scope.$on('pausePolling', function (event, data) {
+    console.log('pausePolling');
+    $scope.pollingStatus = 0;
+  });
+  $scope.$on('resumePolling', function (event, data) {
+    console.log('resumePolling');
+    $scope.pollingStatus = 1;
+    poll();
+  });
 
   $scope.loadOlder = function() {
     var tempList = _.sortBy($scope.csRecs, 'Name');
@@ -213,12 +234,8 @@ angular.module('starter.controllers', [])
     csService.getOlder(oldest).then(function(res){
       var sequence = Promise.resolve();
       res.forEach(function(el){
-        sequence = sequence.then(function() {
-          return formatCsRec(el);
-        }).then(function(el2){
-          $scope.csRecs.unshift(el2);
-          $scope.$digest();
-        });
+        $scope.csRecs.unshift(el);
+        $scope.$digest();
       });
     });
   };
@@ -231,6 +248,8 @@ angular.module('starter.controllers', [])
       $scope.csFilter = "";
     }
   };
+
+
 
 })
 

@@ -25,11 +25,11 @@ describe('AppCtrl', function(){
       $rootScope = _$rootScope_;
     }));
 
-    xit('should call all on TableService', function() {
+    it('should call all on TableService', function() {
       expect(mockTableService.all).toHaveBeenCalled();
     });
 
-    xit('should update the scope.tables', function(){
+    it('should update the scope.tables', function(){
       deferredAll.resolve([{name: "table1"}]);
       $rootScope.$digest();
       expect(scope.tables[0].name).toEqual('table1');

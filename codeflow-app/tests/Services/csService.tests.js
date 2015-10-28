@@ -18,6 +18,7 @@ describe('csService Unit Tests', function(){
     csService = _csService_;
     $rootScope = _$rootScope_;
     force = mockForce;
+
     sessionStorage.setItem('sfNamespace', "123");
 
     rawCsSessResponse = {
@@ -34,18 +35,45 @@ describe('csService Unit Tests', function(){
   /*
    csService.getLatest()
    */
-  it('should fetch latest CS recs', function(done) {
+  describe('getLatest no existing', function(){
+    beforeEach(function() {
+      sessionStorage.clear();
+    });
 
-    var testCsRecs = function(res) {
-      console.log(res);
-      expect(res.length).toBe(2);
-      expect(res[0].Name).toBe("TMP-111");
-      done();
-    };
+    it('should fetch latest CS recs without filtering', function(done) {
+      var testCsRecs = function(res) {
+        expect(res.length).toBe(3);
+        expect(res[0].Name).toBe("TMP-111");
+        expect(JSON.parse(sessionStorage.getItem('TMP-111')).Name).toBe("TMP-111");
+        done();
+      };
 
-    csService.getLatest()
-      .then(testCsRecs);
-  });
+      csService.getLatest()
+        .then(testCsRecs);
+    });
+
+  }); // getLatest no existing
+
+
+  describe('getLatest existing', function(){
+    beforeEach(function() {
+      sessionStorage.clear();
+      sessionStorage.setItem('TMP-111', "MY TEST ENTRY");
+    });
+
+    it('should fetch latest CS recs and filter', function(done) {
+      var testCsRecs = function(res) {
+        expect(res.length).toBe(2);
+        expect(res[0].Name).toBe("TMP-222");
+        expect(sessionStorage.getItem('TMP-111')).toBe("MY TEST ENTRY");
+        expect(JSON.parse(sessionStorage.getItem('TMP-222')).Name).toBe("TMP-222");
+        done();
+      };
+
+      csService.getLatest()
+        .then(testCsRecs);
+    });
+  }); // getLatest existing
 
 
 });
