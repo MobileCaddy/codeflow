@@ -45,7 +45,7 @@ angular.module('starter', ['ionic', 'ui.grid', 'ui.grid.resizeColumns',  'starte
     views: {
       'menuContent': {
         templateUrl: 'templates/dashboard.html',
-        controller: 'DashCtrl'
+        //controller: 'DashCtrl'
       }
     }
   });

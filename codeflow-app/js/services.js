@@ -3,7 +3,13 @@ var underscore = angular.module('underscore', []);
     return window._; // assumes underscore has already been loaded on the page
   });
 
-angular.module('starter.services', ['underscore'])
+angular.module('force', [])
+  .factory('force', function() {
+  return window.force;
+});
+
+angular.module('starter.services', ['underscore', 'force'])
+
 
 /*
  * D A S H B O A R D
@@ -141,7 +147,10 @@ angular.module('starter.services', ['underscore'])
 })
 
 
-.factory('csService', [ function(){
+/*
+ * C O N N    S E R S S I O N S
+ */
+.factory('csService', ['force', 'userService', function(force, userService){
 
 
   function forceQuery(soql){
@@ -156,6 +165,72 @@ angular.module('starter.services', ['underscore'])
         }
       );
     });
+  }
+
+
+  var formatCsRec = function(el){
+
+    var sfNamespace =  sessionStorage.getItem('sfNamespace');
+    return new Promise(function(resolve, reject) {
+
+      var iconClass = "";
+      switch (el[sfNamespace + '__Session_Type__c']) {
+        case "Sync - Refresh" :
+          iconClass = "ion-ios-cloud-download-outline";
+          break;
+        case "Sync - Update" :
+          iconClass = "ion-ios-cloud-upload-outline";
+          break;
+        case "New Install":
+          iconClass = "ion-ios-plus-outline";
+          break;
+        default :
+          iconClass = "ion-oops";
+          break;
+      }
+      el.SessionIconClass = iconClass;
+      if (el[sfNamespace + '__Session_Type__c'] == "Sync - Update") {
+        var totalFail = el[sfNamespace + '__Insert_Failure_Duplication_Count__c'] +
+                        el[sfNamespace + '__Insert_Failure_Match_Failures_Count__c'] +
+                        el[sfNamespace + '__Insert_Failures_Count__c'] +
+                        el[sfNamespace + '__Update_Failure_Match_Failures_Count__c'] +
+                        el[sfNamespace + '__Soft_Delete_Update_Count__c'] +
+                        el[sfNamespace + '__Update_Failures_Count__c'];
+        var totalSucc = el[sfNamespace + '__Insert_Successes_Count__c'] +
+                        el[sfNamespace + '__Update_Successes_Count__c'] ;
+        if (totalFail > 0) {
+          el.rowClass = "fail";
+        }
+        el.totalFail = totalFail;
+        el.totalSucc = totalSucc;
+      }
+      el.Mobile_Table_Name__c = el[sfNamespace + '__Mobile_Table_Name__c'];
+      el.Session_Type__c = el[sfNamespace + '__Session_Type__c'];
+      if (typeof(el.CreatedById) == "undefined") {
+        resolve(el);
+      } else {
+        userService.getUser(el.CreatedById).then(function(userRec){
+          el.UsersName = userRec.Name;
+          resolve(el);
+        }).catch(function(e){
+          console.error(e);
+          resolve(el);
+        });
+      }
+    });
+  };
+
+  function filterAndStoreCS(recs) {
+    var filteredCs = [];
+    recs.forEach(function(el){
+      if (sessionStorage.getItem(el.Name)) {
+        console.debug('SFDC sent a duplicate', el.Name);
+      } else {
+        sessionStorage.setItem(el.Name, JSON.stringify(el));
+        filteredCs.push(el);
+      }
+    });
+    return filteredCs;
   }
 
   function getLatest() {
@@ -180,13 +255,15 @@ angular.module('starter.services', ['underscore'])
         q = 'select Id, CreatedById, Name, ' + csSessType + ',' + csTableName + ',' + csIFD + ',' + csIFM + ',' + csIF + ',' + csIS + ',' + csSDUF + ',' + csUFM + ',' + csUF + ',' + csUS + ', LastModifiedDate from ' + csSobject + ' ORDER BY Name DESC LIMIT 5';
       }
       forceQuery(q).then(function(res){
-        // console.debug('res', res);
         if ( res.totalSize > 0 ) {
           sessionStorage.setItem('latestCsName', res.records[0].Name);
-          resolve(res.records);
+          return Promise.all(res.records.map(formatCsRec));
         } else {
-          resolve([]);
+          console.debug('no entries');
+          return Promise.resolve([]);
         }
+      }).then(function(res){
+        resolve(filterAndStoreCS(res));
       }).catch(function(e){
         console.error(e);
         reject(e);
@@ -212,16 +289,19 @@ angular.module('starter.services', ['underscore'])
       forceQuery(q).then(function(res){
         // console.debug('res', res);
         if ( res.totalSize > 0 ) {
-          resolve(res.records);
+          return Promise.all(res.records.map(formatCsRec));
         } else {
           resolve([]);
         }
+      }).then(function(res){
+        resolve(filterAndStoreCS(res));
       }).catch(function(e){
         console.error(e);
         reject(e);
       });
     });
   }
+
 
   return {
     getLatest: function(){

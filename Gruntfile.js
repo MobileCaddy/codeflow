@@ -105,6 +105,12 @@ module.exports = function(grunt) {
       }
     },
 
+    karma: {
+      unit: {
+        configFile: 'codeflow-app/tests/my.conf.js'
+      }
+    }
+
 
   });
   // Each plugin must be loaded following this pattern
