@@ -1692,6 +1692,7 @@ if ( myUrl.indexOf("scrub=true") > -1 ) {
 
 if ( myUrl.indexOf("scrub=full") > -1 ) {
     for (var i = (numTables -1); i >= 0 ; i--) {
+        var name = localStorage.key( i );
         smartstore.removeSoup(name);
     }
 }

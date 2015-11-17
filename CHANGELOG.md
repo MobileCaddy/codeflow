@@ -1,3 +1,19 @@
+### 1.0.2  (2015-11-17)
+
+
+#### Bug Fixes
+
+* Fixed bug with `scub=full`
+
+#### Features
+
+* NONE
+
+#### Breaking Changes
+
+* NONE
+
+
 ### 1.0.1  (2015-10-27)
 
 
