@@ -25,10 +25,10 @@
 
 	    require = function (id) {
 	        if (!modules[id]) {
-	        	mobileLogger.logMessageAndThrow("module " + id + " not found");
+	        	console.error("module " + id + " not found");
 	        } else if (id in inProgressModules) {
 	            var cycle = requireStack.slice(inProgressModules[id]).join('->') + '->' + id;
-	            mobileLogger.logMessageAndThrow("Cycle in require graph: " + cycle);
+	            console.error("Cycle in require graph: " + cycle);
 	        }
 	        if (modules[id].factory) {
 	            try {
@@ -45,7 +45,7 @@
 
 	    define = function (id, factory) {
 	        if (modules[id]) {
-	        	mobileLogger.logMessageAndThrow("module " + id + " already defined");
+	        	console.error("module " + id + " already defined");
 	        }
 
 	        modules[id] = {
@@ -91,6 +91,33 @@
 		// Expose the mobileCaddy class
 		module.exports = mobileCaddy;
 	}); // end mobileCaddy define
+
+
+
+	// ================================ //
+	// Logger Utilities              //
+	// ================================ //
+	define("mobileCaddy/logger", function(require, exports, module) {
+
+		// Exposed functions
+		module.exports = {
+			debug : function(content) {
+				return true;
+			},
+			error : function(content) {
+				return true;
+			},
+			info : function(content) {
+				return true;
+			},
+			log : function(content) {
+				return true;
+			},
+			warn : function(content) {
+				return true;
+			},
+		}; // end export section
+	});
 
 
 

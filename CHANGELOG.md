@@ -1,3 +1,19 @@
+### 1.0.3  (2015-11-18)
+
+
+#### Bug Fixes
+
+* Updated mcUtilsMock to better work with e2e tests
+
+#### Features
+
+* NONE
+
+#### Breaking Changes
+
+* NONE
+
+
 ### 1.0.2  (2015-11-17)
 
 
