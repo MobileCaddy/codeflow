@@ -94,6 +94,32 @@
 
 
 
+	// ================================ //
+	// Logger Utilities              //
+	// ================================ //
+	define("mobileCaddy/logger", function(require, exports, module) {
+
+		// Exposed functions
+		module.exports = {
+			debug : function(content) {
+				return true;
+			},
+			error : function(content) {
+				return true;
+			},
+			info : function(content) {
+				return true;
+			},
+			log : function(content) {
+				return true;
+			},
+			warn : function(content) {
+				return true;
+			},
+		}; // end export section
+	});
+
+
 		// ================================ //
 	// Developer Utilities              //
 	// ================================ //

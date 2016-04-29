@@ -11,6 +11,7 @@
 * Support of v0.1.0 of mobilecaddy-utils
 * Removed over-excited logging in MockSmartStore and mockVfRemote
 * Partial support for "SELECT ... IN..." SOQL
+* Adding mobileLogger to mcUtilsMock to support unit testing
 
 #### Breaking Changes
 
