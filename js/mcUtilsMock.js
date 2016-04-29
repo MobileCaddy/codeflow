@@ -25,10 +25,10 @@
 
 	    require = function (id) {
 	        if (!modules[id]) {
-	        	console.error("module " + id + " not found");
+	        	mobileLogger.logMessageAndThrow("module " + id + " not found");
 	        } else if (id in inProgressModules) {
 	            var cycle = requireStack.slice(inProgressModules[id]).join('->') + '->' + id;
-	            console.error("Cycle in require graph: " + cycle);
+	            mobileLogger.logMessageAndThrow("Cycle in require graph: " + cycle);
 	        }
 	        if (modules[id].factory) {
 	            try {
@@ -45,7 +45,7 @@
 
 	    define = function (id, factory) {
 	        if (modules[id]) {
-	        	console.error("module " + id + " already defined");
+	        	mobileLogger.logMessageAndThrow("module " + id + " already defined");
 	        }
 
 	        modules[id] = {
@@ -94,33 +94,6 @@
 
 
 
-	// ================================ //
-	// Logger Utilities              //
-	// ================================ //
-	define("mobileCaddy/logger", function(require, exports, module) {
-
-		// Exposed functions
-		module.exports = {
-			debug : function(content) {
-				return true;
-			},
-			error : function(content) {
-				return true;
-			},
-			info : function(content) {
-				return true;
-			},
-			log : function(content) {
-				return true;
-			},
-			warn : function(content) {
-				return true;
-			},
-		}; // end export section
-	});
-
-
-
 		// ================================ //
 	// Developer Utilities              //
 	// ================================ //
@@ -163,7 +136,7 @@
 			// TODO : 'LastViewedDate' - should this be local field that can be updated
 			// explicitly (for 'recent items' type usage)
 			//'LastViewedDate',
-			'mobilecaddy1__MC_Proxy_ID',
+			'mc_package_002__MC_Proxy_ID',
 			'MC_Proxy_ID',
 			'OwnerId',
 			'SystemModstamp',

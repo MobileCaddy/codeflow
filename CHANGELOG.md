@@ -1,3 +1,22 @@
+### 1.0.4  (2016-04-29)
+
+
+#### Bug Fixes
+
+* Fixed updating of records in MockSmartStore, previously was keeping unspecified fields in updates.
+* Better, more robust scrubbing.
+
+#### Features
+
+* Support of v0.1.0 of mobilecaddy-utils
+* Removed over-excited logging in MockSmartStore and mockVfRemote
+* Partial support for "SELECT ... IN..." SOQL
+
+#### Breaking Changes
+
+* Min v3 of npm required. See [Dev Guides](http://developer.mobilecaddy.net) for information on using previous versions
+
+
 ### 1.0.3  (2015-11-18)
 
 

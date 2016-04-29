@@ -24,6 +24,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * MobileCaddy Adaption
+ * Uses (more) persitent storage
+ * Version: 1.0.0
+ */
+
 /**
  * Mock Cordova: mocks just enough cordova functions to allow testing of plugins outside a container
  *
@@ -715,7 +721,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
 
     // ====== Soup manipulation ======
     var registerSoup = function (soupName, indexSpecs, successCB, errorCB) {
-        console.log("SmartStore.registerSoup: '" + soupName + "' indexSpecs: " + JSON.stringify(indexSpecs));
+        if (logLevel > 0) console.log("SmartStore.registerSoup: '" + soupName + "' indexSpecs: " + JSON.stringify(indexSpecs));
         exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
              "pgRegisterSoup",
              [{"soupName": soupName, "indexes": indexSpecs}]
@@ -723,7 +729,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
     };
 
     var removeSoup = function (soupName, successCB, errorCB) {
-        console.log("SmartStore.removeSoup: " + soupName);
+        if (logLevel > 0) console.log("SmartStore.removeSoup: " + soupName);
         exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
              "pgRemoveSoup",
              [{"soupName": soupName}]
@@ -731,7 +737,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
     };
 
     var soupExists = function (soupName, successCB, errorCB) {
-        console.log("SmartStore.soupExists: " + soupName);
+        if (logLevel > 0) console.log("SmartStore.soupExists: " + soupName);
         exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
              "pgSoupExists",
              [{"soupName": soupName}]
@@ -740,7 +746,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
 
     var querySoup = function (soupName, querySpec, successCB, errorCB) {
         if (querySpec.queryType == "smart") throw new Error("Smart queries can only be run using runSmartQuery");
-        console.log("SmartStore.querySoup: '" + soupName + "' indexPath: " + querySpec.indexPath);
+        if (logLevel > 0) console.log("SmartStore.querySoup: '" + soupName + "' indexPath: " + querySpec.indexPath);
         exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
              "pgQuerySoup",
              [{"soupName": soupName, "querySpec": querySpec}]
@@ -749,7 +755,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
 
     var runSmartQuery = function (querySpec, successCB, errorCB) {
         if (querySpec.queryType != "smart") throw new Error("runSmartQuery can only run smart queries");
-        console.log("SmartStore.runSmartQuery: smartSql: " + querySpec.smartSql);
+        if (logLevel > 0) console.log("SmartStore.runSmartQuery: smartSql: " + querySpec.smartSql);
         exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
              "pgRunSmartQuery",
              [{"querySpec": querySpec}]
@@ -781,7 +787,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
     };
 
     var removeFromSoup = function (soupName, entryIds, successCB, errorCB) {
-        console.log("SmartStore.removeFromSoup: '" + soupName + "' entryIds: " + entryIds);
+        if (logLevel > 0) console.log("SmartStore.removeFromSoup: '" + soupName + "' entryIds: " + entryIds);
         exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
              "pgRemoveFromSoup",
              [{"soupName": soupName, "entryIds": entryIds}]
@@ -1253,9 +1259,13 @@ var MockSmartStore = (function(window) {
                         //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
                         soup = _.map(soup, function(el) {
                             if ( el[externalIdPath] == entry[externalIdPath] ) {
-                                for (var attrname in entry) { el[attrname] = entry[attrname]; }
-                                el._soupLastModifiedDate = timeNow;
-                                return el;
+                                // MSD-379 - Real SmartStore drops fields that are not in the update
+                                // for (var attrname in entry) { el[attrname] = entry[attrname]; }
+                                // el._soupLastModifiedDate = timeNow;
+                                // return el;
+                                entry._soupLastModifiedDate = timeNow;
+                                entry._soupEntryId = entryExists._soupEntryId;
+                                return entry;
                             } else {
                                 return el;
                             }
@@ -1280,6 +1290,7 @@ var MockSmartStore = (function(window) {
                     //console.debug('entryExists -> '+ JSON.stringify(entryExists));
                     // what happens if I just remove this check?
                     //if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
+                    // MSD-371 - This looks buggy
                     if ( true )  {
                         // Id matches existing, if so replace rather than add
                         //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
@@ -1357,7 +1368,7 @@ var MockSmartStore = (function(window) {
             // NB we don't have full support evidently
 
             var smartSql = querySpec.smartSql;
-            console.debug("smartSql", smartSql);
+            // console.debug("smartSql", smartSql);
 
             var soupName = '';
             var whereField = '';
@@ -1399,20 +1410,54 @@ var MockSmartStore = (function(window) {
             }
 
 
+            // SELECT * FROM {soupName} WHERE {soupName:whereField} IN (values)
+            m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} IN \((.*)\)/i);
+            if (m !== null && m[1] == m[2] ) {
+                soupName = m[1];
+                var selectField = m[2];
+                whereField = m[3];
+
+                var values = m[4].split(",");
+                for (var i=0; i<values.length; i++) {
+                    values[i] = values[i].split("'")[1]; // getting rid of surrounding '
+                }
+
+                this.checkSoup(soupName);
+                this.checkIndex(soupName, selectField);
+                this.checkIndex(soupName, whereField);
+                soup = JSON.parse(localStorage[soupName]);
+
+                results = [];
+                values.forEach(function(fieldValue){
+                    var props = {};
+                    props[whereField] = fieldValue;
+                    var found = _.where(soup, props);
+                    if (found.length > 0) {
+                        found.forEach(function(f){
+                            var row = [f._soupEntryId];
+                            row.push(f);
+                            results.push(row);
+                        });
+                    }
+                });
+                return results;
+            }
+
+
             // SELECT {soupName:selectField} FROM {soupName} WHERE [{soupName:whereField} = value]
             m = smartSql.match(/SELECT \* FROM {(.*)} WHERE (.*)/i);
             // Orig
             // m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} = (.*)/i);
             if (m !== null && m[1] !== null) {
                 var whereStr = m[2].split("AND");
-                console.debug('whereStr', whereStr);
+                // console.debug('whereStr', whereStr);
 
                 var props = {};
                 var whereValue = '';
 
                 whereStr.forEach(function(str){
                     mWhere = str.match(/{(.*):(.*)} = (.*)/i);
-                    console.debug('mWhere', mWhere);
+                    // console.debug('mWhere', mWhere);
                     whereField = mWhere[2];
                     whereValue = mWhere[3].split("'")[1];
                     props[whereField] = whereValue;
@@ -1425,7 +1470,7 @@ var MockSmartStore = (function(window) {
                 soup = JSON.parse(localStorage[soupName]);
 
                 results = [];
-                console.debug('props', props);
+                // console.debug('props', props);
                 var matchedSoups = _.where(soup, props);
                 var matchedSoups2 = matchedSoups.map(function(el){
                     row = [el._soupEntryId];
@@ -1679,19 +1724,16 @@ mockStore.hookToCordova(cordova);
 
 var myUrl = document.URL;
 var smartstore = cordova.require("com.salesforce.plugin.smartstore");
-var numTables = localStorage.length;
-
 if ( myUrl.indexOf("scrub=true") > -1 ) {
-    for (var i = (numTables -1); i >= 0 ; i--) {
+    for (var i = 0; i < localStorage.length; i++) {
         var name = localStorage.key( i );
         if ( name != 'forceOAuth' ) {
             smartstore.removeSoup(name);
         }
     }
 }
-
 if ( myUrl.indexOf("scrub=full") > -1 ) {
-    for (var i = (numTables -1); i >= 0 ; i--) {
+    for (var i = 0; i < localStorage.length; i++) {
         var name = localStorage.key( i );
         smartstore.removeSoup(name);
     }

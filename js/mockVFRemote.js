@@ -34,7 +34,8 @@ function queryMockJsonFile(remoteCall, success) {
 	$j.ajax({
 		url: myUri,
 		success: function (data) {
-			console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+			console.log("Read from file " + myUri + " OK");
+			// console.log(JSON.stringify(data));
 			success(JSON.stringify(data));
 		},
 		error: function (e) {
@@ -43,7 +44,8 @@ function queryMockJsonFile(remoteCall, success) {
 				$j.ajax({
 					url: myUri,
 					success: function (data) {
-						console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+						console.log("Read from file " + myUri + " OK");
+						// console.log(JSON.stringify(data));
 						 success(JSON.stringify(data));
 					},
 					error: function (e) {
@@ -62,7 +64,8 @@ function queryMockJsonTableFile(remoteCall, tableName, success) {
 	$j.ajax({
 		url: myUri,
 		success: function (data) {
-			console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+			console.log("Read from file " + myUri + " OK");
+			// console.log(JSON.stringify(data));
 			if (data.lastRefreshDatetime) data.lastRefreshDatetime = timeNow;
 			success(JSON.stringify(data));
 		},
@@ -73,7 +76,8 @@ function queryMockJsonTableFile(remoteCall, tableName, success) {
 					url: myUri,
 					success: function (data) {
 						console.info('data');
-						console.log("Read from file " + myUri + " OK -> " + JSON.stringify(data));
+						console.log("Read from file " + myUri + " OK");
+						// console.log(JSON.stringify(data));
 						if (data.lastRefreshDatetime) data.lastRefreshDatetime = timeNow;
 						success(JSON.stringify(data));
 					},
