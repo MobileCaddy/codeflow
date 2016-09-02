@@ -51,6 +51,9 @@ function recordResponse(req, response, body){
             case "getDefsForSObjectMobileTables001" :
                 fName = "getDefsForSObjectMobileTables.json"
                 break;
+            case "p2mRefreshRecTypeDOTs001" :
+                fName = "p2mRefreshRecTypeDOTs.json"
+                break;
             case "p2mRefreshTable001" :
                 if (req.body.lastRefreshDateTime == 0){
                     // only update mocks if it's the first response.
