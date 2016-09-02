@@ -183,7 +183,7 @@ Visualforce.remoting.Manager = {
 					success(data, eventObj);
 				});
 				break;
-  		case 'p2mRefreshRecTypeDOTs001' :
+  		case 'p2mRefreshRecTypeDOTs' :
 				queryMockJsonFile('p2mRefreshRecTypeDOTs', function(data) {
 					success(data, eventObj);
 				});
