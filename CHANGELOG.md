@@ -1,3 +1,19 @@
+### 2.1.0  (2016-09-06)
+
+
+#### Bug Fixes
+
+* NONE
+
+#### Features
+
+* Adding support for DOTs local (mock) data.
+
+#### Breaking Changes
+
+* NONE
+
+
 ### 2.0.0  (2016-04-29)
 
 

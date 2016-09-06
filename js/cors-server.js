@@ -36,6 +36,7 @@ function recordResponse(req, response, body){
         fName = "";
 
     var path = req.url.split("/").pop();
+    console.log("path", path);
 
     if (response.statusCode == 200){
         switch (path) {
