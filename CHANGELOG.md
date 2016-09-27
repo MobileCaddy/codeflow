@@ -3,7 +3,7 @@
 
 #### Bug Fixes
 
-* NONE
+* Fixed issue with SOQL WHERE call when passing integer as match.
 
 #### Features
 
