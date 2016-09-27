@@ -36,6 +36,7 @@ function recordResponse(req, response, body){
         fName = "";
 
     var path = req.url.split("/").pop();
+    console.log("path", path);
 
     if (response.statusCode == 200){
         switch (path) {
@@ -50,6 +51,9 @@ function recordResponse(req, response, body){
                 break;
             case "getDefsForSObjectMobileTables001" :
                 fName = "getDefsForSObjectMobileTables.json"
+                break;
+            case "p2mRefreshRecTypeDOTs001" :
+                fName = "p2mRefreshRecTypeDOTs.json"
                 break;
             case "p2mRefreshTable001" :
                 if (req.body.lastRefreshDateTime == 0){

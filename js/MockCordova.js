@@ -1459,7 +1459,13 @@ var MockSmartStore = (function(window) {
                     mWhere = str.match(/{(.*):(.*)} = (.*)/i);
                     // console.debug('mWhere', mWhere);
                     whereField = mWhere[2];
-                    whereValue = mWhere[3].split("'")[1];
+                    // console.log('mWhere[3]', mWhere[3]);
+                    if (isNaN(parseInt(mWhere[3]))) {
+                        whereValue = mWhere[3].split("'")[1];
+                    } else {
+                        whereValue = parseInt(mWhere[3]);
+                    }
+                    // console.log('whereValue', whereValue);
                     props[whereField] = whereValue;
                 });
 
