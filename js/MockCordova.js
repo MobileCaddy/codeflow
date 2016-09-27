@@ -1450,16 +1450,22 @@ var MockSmartStore = (function(window) {
             // m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} = (.*)/i);
             if (m !== null && m[1] !== null) {
                 var whereStr = m[2].split("AND");
-                // console.debug('whereStr', whereStr);
+                console.debug('whereStr', whereStr);
 
                 var props = {};
                 var whereValue = '';
 
                 whereStr.forEach(function(str){
                     mWhere = str.match(/{(.*):(.*)} = (.*)/i);
-                    // console.debug('mWhere', mWhere);
+                    console.debug('mWhere', mWhere);
                     whereField = mWhere[2];
-                    whereValue = mWhere[3].split("'")[1];
+                    console.log('mWhere[3]', mWhere[3]);
+                    if (isNaN(parseInt(mWhere[3]))) {
+                        whereValue = mWhere[3].split("'")[1];
+                    } else {
+                        whereValue = parseInt(mWhere[3]);
+                    }
+                    console.log('whereValue', whereValue);
                     props[whereField] = whereValue;
                 });
 
@@ -1470,7 +1476,7 @@ var MockSmartStore = (function(window) {
                 soup = JSON.parse(localStorage[soupName]);
 
                 results = [];
-                // console.debug('props', props);
+                console.debug('props', props);
                 var matchedSoups = _.where(soup, props);
                 var matchedSoups2 = matchedSoups.map(function(el){
                     row = [el._soupEntryId];
