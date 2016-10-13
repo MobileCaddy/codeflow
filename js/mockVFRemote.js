@@ -56,11 +56,9 @@ function queryMockJsonFile(remoteCall, success) {
 								console.error("Error reading from file" + myUri + " -> " + JSON.stringify(e));
 								success([]);
 							}
-						}
-					}
-				});
+					});
+				}
 			}
-			//success([]);
 		}
 	});
 }
@@ -198,6 +196,7 @@ Visualforce.remoting.Manager = {
 				queryMockJsonFile('getDefsForSObjectMobileTables', function(data) {
 					success(data, eventObj);
 				});
+				break;
   		case 'getRecordTypeDots' :
 				queryMockJsonFile('getRecordTypeDots', function(data) {
 					success(data, eventObj);

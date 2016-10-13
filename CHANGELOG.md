@@ -1,3 +1,34 @@
+### 2.1.2  (2016-09-06)
+
+
+#### Bug Fixes
+
+* Sily typo
+
+#### Features
+
+* NONE.
+
+#### Breaking Changes
+
+* NONE
+
+
+### 2.1.1  (2016-09-06)
+
+
+#### Bug Fixes
+
+* Fixed issue with p2mRefreshRecTypeDOTs call when running mock on recorded data that does not contain mock
+
+#### Features
+
+* NONE.
+
+#### Breaking Changes
+
+* NONE
+
 ### 2.1.0  (2016-09-06)
 
 
