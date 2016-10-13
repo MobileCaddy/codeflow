@@ -39,22 +39,28 @@ function queryMockJsonFile(remoteCall, success) {
 			success(JSON.stringify(data));
 		},
 		error: function (e) {
-			if ( e.status == 404){
-				myUri = "../../test/" + remoteCall + ".json";
-				$j.ajax({
-					url: myUri,
-					success: function (data) {
-						console.log("Read from file " + myUri + " OK");
-						// console.log(JSON.stringify(data));
-						 success(JSON.stringify(data));
-					},
-					error: function (e) {
-						console.error("Error reading from file" + myUri + " -> " + JSON.stringify(e));
-						success([]);
+			if (remoteCall == 'p2mRefreshRecTypeDOTs'){
+				console.log("hey");
+				success("[]");
+			} else {
+				if ( e.status == 404){
+					myUri = "../../test/" + remoteCall + ".json";
+					$j.ajax({
+						url: myUri,
+						success: function (data) {
+							console.log("Read from file " + myUri + " OK");
+							// console.log(JSON.stringify(data));
+							 success(JSON.stringify(data));
+						},
+						error: function (e) {
+								console.error("Error reading from file" + myUri + " -> " + JSON.stringify(e));
+								success([]);
+							}
+						}
 					}
 				});
 			}
-			success([]);
+			//success([]);
 		}
 	});
 }
@@ -155,6 +161,16 @@ Visualforce.remoting.Manager = {};
 
 // Object together with the method declarations
 Visualforce.remoting.Manager = {
+	getAction: function() {
+		var callName = arguments[0].split(".").pop();
+		switch (callName) {
+  		case 'p2mRefreshRecTypeDOTs' :
+			return true;
+		default:
+			return true;
+		}
+	},
+
   invokeAction: function() {
   	// I'm assuming that the penultimate and last args are success and error callbacks.
   	var callName = arguments[0].split(".").pop();
@@ -180,6 +196,10 @@ Visualforce.remoting.Manager = {
 				break;
   		case 'getDefsForSObjectMobileTables' :
 				queryMockJsonFile('getDefsForSObjectMobileTables', function(data) {
+					success(data, eventObj);
+				});
+  		case 'getRecordTypeDots' :
+				queryMockJsonFile('getRecordTypeDots', function(data) {
 					success(data, eventObj);
 				});
 				break;
