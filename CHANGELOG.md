@@ -1,3 +1,19 @@
+### 2.1.3  (2016-10-17)
+
+
+#### Bug Fixes
+
+* NONE
+
+#### Features
+
+* Fixed es6 dep to 3.3.1 as v4 was breaking unit tests due to it not auto-polyilling.
+
+#### Breaking Changes
+
+* NONE
+
+
 ### 2.1.2  (2016-09-06)
 
 

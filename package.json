@@ -1,6 +1,6 @@
 {
   "name": "mobilecaddy-codeflow",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "homepage": "https://github.com/MobileCaddy/codeflow",
   "author": "MobileCaddy",
   "description": "Files to support CodeFlow development for MobileCaddy",
@@ -13,7 +13,7 @@
   "dependencies": {
     "jquery": ">=2.0.0",
     "underscore": ">=1.5.2",
-    "es6-promise": "^3.0.2",
+    "es6-promise": "3.3.1",
     "forcejs": "git+https://github.com/toddhalfpenny/forcejs.git",
     "angular-ui-grid": "^3.0.7"
   },
