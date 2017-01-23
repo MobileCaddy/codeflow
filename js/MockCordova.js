@@ -640,7 +640,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
         this.order = "ascending";
 
         //the number of entries to copy from native to javascript per each cursor page
-        this.pageSize = 10;
+        this.pageSize = 10000;
     };
 
     /**
@@ -677,7 +677,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
         var inst = new QuerySpec(path);
         inst.queryType = "range";
         if (order) { inst.order = order; } // override default only if a value was specified
-        if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
+        // if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
         return inst;
     };
 
@@ -685,7 +685,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
     var buildExactQuerySpec = function (path, matchKey, pageSize) {
         var inst = new QuerySpec(path);
         inst.matchKey = matchKey;
-        if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
+        //if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
         return inst;
     };
 
@@ -696,7 +696,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
         inst.beginKey = beginKey;
         inst.endKey = endKey;
         if (order) { inst.order = order; } // override default only if a value was specified
-        if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
+        // if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
         return inst;
     };
 
@@ -706,7 +706,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
         inst.queryType = "like";
         inst.likeKey = likeKey;
         if (order) { inst.order = order; } // override default only if a value was specified
-        if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
+        // if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
         return inst;
     };
 
@@ -715,7 +715,7 @@ cordova.define("com.salesforce.plugin.smartstore", function (require, exports, m
         var inst = new QuerySpec();
         inst.queryType = "smart";
         inst.smartSql = smartSql;
-        if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
+        // if (pageSize) { inst.pageSize = pageSize; } // override default only if a value was specified
         return inst;
     };
 
@@ -1175,13 +1175,18 @@ var MockSmartStore = (function(window) {
         },
 
         soupExists: function(soupName) {
-            // return _soups[soupName] !== undefined;
-            if ( localStorage[soupName] ) {
-                //console.info("soupExists true -> " + soupName);
-                return true;
+            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+                // In electron
+                return ipcRenderer.sendSync('smartstore', {method: 'soupExists', args: {table : soupName}});
             } else {
-                //console.info("soupExists false -> "+  soupName);
-                return false;
+                // return _soups[soupName] !== undefined;
+                if ( localStorage[soupName] ) {
+                    //console.info("soupExists true -> " + soupName);
+                    return true;
+                } else {
+                    //console.info("soupExists false -> "+  soupName);
+                    return false;
+                }
             }
         },
 
@@ -1204,116 +1209,131 @@ var MockSmartStore = (function(window) {
 
         registerSoup: function(soupName, indexSpecs) {
             if (!this.soupExists(soupName)) {
-                // _soups[soupName] = {};
-                // _soupIndexSpecs[soupName] = indexSpecs;
-                localStorage[soupName] = JSON.stringify([]);
-                if (!this.soupExists('soupIndexSpecs')) {
-                    localStorage.soupIndexSpecs = JSON.stringify([]);
+                if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+                // In electron
+                return ipcRenderer.sendSync('smartstore', {method: 'registerSoup', args: {table : soupName, indexSpecs : indexSpecs}});
+                } else {
+                    localStorage[soupName] = JSON.stringify([]);
+                    if (!this.soupExists('soupIndexSpecs')) {
+                        localStorage.soupIndexSpecs = JSON.stringify([]);
+                    }
+                    var soupIndexSpecs = JSON.parse(localStorage.soupIndexSpecs);
+                    soupIndexSpecs.push({'soup': soupName, 'indexSpecs' :indexSpecs});
+                    localStorage.soupIndexSpecs = JSON.stringify(soupIndexSpecs);
                 }
-                var soupIndexSpecs = JSON.parse(localStorage.soupIndexSpecs);
-                soupIndexSpecs.push({'soup': soupName, 'indexSpecs' :indexSpecs});
-                localStorage.soupIndexSpecs = JSON.stringify(soupIndexSpecs);
             }
             return soupName;
         },
 
         removeSoup: function(soupName) {
-            localStorage.removeItem(soupName);
-            if (this.soupExists('soupIndexSpecs')) {
-                var soupIndexSpecs = JSON.parse(localStorage.soupIndexSpecs);
-                soupIndexSpecs = _.reject(soupIndexSpecs, function(el) {
-                    return el.soup == soupName;
-                });
-                localStorage.soupIndexSpecs = JSON.stringify(soupIndexSpecs);
+            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            // In electron
+                return ipcRenderer.sendSync('smartstore', {method: 'removeSoup', args: {table : soupName}});
+            } else {
+                localStorage.removeItem(soupName);
+                if (this.soupExists('soupIndexSpecs')) {
+                    var soupIndexSpecs = JSON.parse(localStorage.soupIndexSpecs);
+                    soupIndexSpecs = _.reject(soupIndexSpecs, function(el) {
+                        return el.soup == soupName;
+                    });
+                    localStorage.soupIndexSpecs = JSON.stringify(soupIndexSpecs);
+                }
+                // delete _soups[soupName];
+                // delete _soupIndexSpecs[soupName];
+                // delete _nextSoupEltIds[soupName];
             }
-            // delete _soups[soupName];
-            // delete _soupIndexSpecs[soupName];
-            // delete _nextSoupEltIds[soupName];
         },
 
         upsertSoupEntries: function(soupName, entries, externalIdPath) {
             // console.info('upsertSoupEntries, soupName -> ' + soupName + ', externalIdPath -> ' + externalIdPath);
             // console.info('upsertSoupEntries, soupName -> ' + soupName + ', entries -> ' + JSON.stringify(entries) + ', externalIdPath -> ' + externalIdPath);
-            this.checkSoup(soupName);
-            if (externalIdPath != "_soupEntryId" && !this.indexExists(soupName, externalIdPath))
-                throw new Error(soupName + " does not have an index on " + externalIdPath);
 
-            //var soup = _soups[soupName];
-            var soup = JSON.parse(localStorage[soupName]);
-            // console.info('upsertSoupEntries, presoup -> ' + JSON.stringify(soup));
-            var upsertedEntries = [];
-            for (var i=0; i<entries.length; i++) {
-                var entry = JSON.parse(JSON.stringify(entries[i])); // clone
-                var isNew = true;
-                var timeNow = new Date().valueOf();
+            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            // In electron
+                var result = ipcRenderer.sendSync('smartstore', {method: 'upsertSoupEntries', args: {table : soupName, entries : entries, externalIdPath : externalIdPath}});
+                return result;
+            } else {
+                this.checkSoup(soupName);
+                if (externalIdPath != "_soupEntryId" && !this.indexExists(soupName, externalIdPath))
+                    throw new Error(soupName + " does not have an index on " + externalIdPath);
 
-                var searchObj = {};
-                var entryExists = false;
-                if (!("_soupEntryId" in entry)) {
-                    searchObj[externalIdPath] = entry[externalIdPath];
-                    entryExists = _.findWhere(soup, searchObj);
-                    // console.debug('entryExists -> '+ JSON.stringify(entryExists));
-                    if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
-                        // UPDATE
-                        // Id matches existing, if so update rather than add
-                        //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
-                        soup = _.map(soup, function(el) {
-                            if ( el[externalIdPath] == entry[externalIdPath] ) {
-                                // MSD-379 - Real SmartStore drops fields that are not in the update
-                                // for (var attrname in entry) { el[attrname] = entry[attrname]; }
-                                // el._soupLastModifiedDate = timeNow;
-                                // return el;
-                                entry._soupLastModifiedDate = timeNow;
-                                entry._soupEntryId = entryExists._soupEntryId;
-                                return entry;
-                            } else {
-                                return el;
-                            }
-                        });
-                    } else {
-                        // CREATE
-                        var curMaxId = _.max(soup, function(el) {return el._soupEntryId;});
-                        if ( curMaxId == -Infinity ) {
-                            curMaxId = 0;
+                //var soup = _soups[soupName];
+                var soup = JSON.parse(localStorage[soupName]);
+                // console.info('upsertSoupEntries, presoup -> ' + JSON.stringify(soup));
+                var upsertedEntries = [];
+                for (var i=0; i<entries.length; i++) {
+                    var entry = JSON.parse(JSON.stringify(entries[i])); // clone
+                    var isNew = true;
+                    var timeNow = new Date().valueOf();
+
+                    var searchObj = {};
+                    var entryExists = false;
+                    if (!("_soupEntryId" in entry)) {
+                        searchObj[externalIdPath] = entry[externalIdPath];
+                        entryExists = _.findWhere(soup, searchObj);
+                        // console.debug('entryExists -> '+ JSON.stringify(entryExists));
+                        if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
+                            // UPDATE
+                            // Id matches existing, if so update rather than add
+                            //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
+                            soup = _.map(soup, function(el) {
+                                if ( el[externalIdPath] == entry[externalIdPath] ) {
+                                    // MSD-379 - Real SmartStore drops fields that are not in the update
+                                    // for (var attrname in entry) { el[attrname] = entry[attrname]; }
+                                    // el._soupLastModifiedDate = timeNow;
+                                    // return el;
+                                    entry._soupLastModifiedDate = timeNow;
+                                    entry._soupEntryId = entryExists._soupEntryId;
+                                    return entry;
+                                } else {
+                                    return el;
+                                }
+                            });
                         } else {
-                            curMaxId = curMaxId._soupEntryId;
-                        }
-                        var newId = curMaxId + 1;
-                        entry._soupEntryId = newId;
-                        var myEntry = {};
-                        myEntry[newId] = entry;
-                        soup.push(entry);
-                    }
-                } else { // UPDATE
-                    searchObj[externalIdPath] = entry[externalIdPath];
-                    entryExists = _.findWhere(soup, searchObj);
-                    //console.debug('entryExists -> '+ JSON.stringify(entryExists));
-                    // what happens if I just remove this check?
-                    //if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
-                    // MSD-371 - This looks buggy
-                    if ( true )  {
-                        // Id matches existing, if so replace rather than add
-                        //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
-                        soup = _.map(soup, function(el) {
-                            if ( el[externalIdPath] == entry[externalIdPath] ) {
-                                return entry;
+                            // CREATE
+                            var curMaxId = _.max(soup, function(el) {return el._soupEntryId;});
+                            if ( curMaxId == -Infinity ) {
+                                curMaxId = 0;
                             } else {
-                                return el;
+                                curMaxId = curMaxId._soupEntryId;
                             }
-                        });
+                            var newId = curMaxId + 1;
+                            entry._soupEntryId = newId;
+                            var myEntry = {};
+                            myEntry[newId] = entry;
+                            soup.push(entry);
+                        }
+                    } else { // UPDATE
+                        searchObj[externalIdPath] = entry[externalIdPath];
+                        entryExists = _.findWhere(soup, searchObj);
+                        //console.debug('entryExists -> '+ JSON.stringify(entryExists));
+                        // what happens if I just remove this check?
+                        //if ( typeof(entry.Id) != "undefined"  && typeof(entryExists) != "undefined")  {
+                        // MSD-371 - This looks buggy
+                        if ( true )  {
+                            // Id matches existing, if so replace rather than add
+                            //console.debug('upsertSoupEntries,  matches existing, if so replace rather than add');
+                            soup = _.map(soup, function(el) {
+                                if ( el[externalIdPath] == entry[externalIdPath] ) {
+                                    return entry;
+                                } else {
+                                    return el;
+                                }
+                            });
+                        }
                     }
-                }
 
-                //console.info('upsertSoupEntries, entry -> ' + JSON.stringify(entry));
-                // update/insert into soup
-                //soup[ entry._soupEntryId ] = entry;
-                entry._soupLastModifiedDate = timeNow;
-                upsertedEntries.push(entry);
-                //console.info('upsertSoupEntries, soup -> ' + JSON.stringify(soup));
-                //console.info('upsertSoupEntries, upsertedEntries -> ' + JSON.stringify(upsertedEntries));
+                    //console.info('upsertSoupEntries, entry -> ' + JSON.stringify(entry));
+                    // update/insert into soup
+                    //soup[ entry._soupEntryId ] = entry;
+                    entry._soupLastModifiedDate = timeNow;
+                    upsertedEntries.push(entry);
+                    //console.info('upsertSoupEntries, soup -> ' + JSON.stringify(soup));
+                    //console.info('upsertSoupEntries, upsertedEntries -> ' + JSON.stringify(upsertedEntries));
+                }
+                localStorage[soupName] = JSON.stringify(soup);
+                return upsertedEntries;
             }
-            localStorage[soupName] = JSON.stringify(soup);
-            return upsertedEntries;
         },
 
         retrieveSoupEntries: function(soupName, entryIds) {
@@ -1336,22 +1356,27 @@ var MockSmartStore = (function(window) {
         },
 
         removeFromSoup: function(soupName, entryIds) {
-            this.checkSoup(soupName);
-            //var soup = _soups[soupName];
-            var soup = JSON.parse(localStorage[soupName]);
-            soup = _.reject(soup, function(el) {
-                if ( entryIds.indexOf(el._soupEntryId) == -1 ){
-                    return false;
-                } else {
-                    return true;
-                }
-            });
-            // for (var i=0; i<entryIds.length; i++) {
-            //     var entryId = entryIds[i];
-            //     console.debug('removeFromSoup: ->  -> entryId' + entryId);
-            //     delete soup[entryId];
-            // }
-            localStorage[soupName] = JSON.stringify(soup);
+            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            // In electron
+                return ipcRenderer.sendSync('smartstore', {method: 'removeFromSoup', args: {table : soupName, entryIds : entryIds}});
+            } else {
+                this.checkSoup(soupName);
+                //var soup = _soups[soupName];
+                var soup = JSON.parse(localStorage[soupName]);
+                soup = _.reject(soup, function(el) {
+                    if ( entryIds.indexOf(el._soupEntryId) == -1 ){
+                        return false;
+                    } else {
+                        return true;
+                    }
+                });
+                // for (var i=0; i<entryIds.length; i++) {
+                //     var entryId = entryIds[i];
+                //     console.debug('removeFromSoup: ->  -> entryId' + entryId);
+                //     delete soup[entryId];
+                // }
+                localStorage[soupName] = JSON.stringify(soup);
+            }
         },
 
         project: function(soupElt, path) {
@@ -1366,194 +1391,198 @@ var MockSmartStore = (function(window) {
 
         smartQuerySoupFull: function(querySpec) {
             // NB we don't have full support evidently
+            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            // In electron
+                return ipcRenderer.sendSync('smartstore', {method: 'smartQuerySoupFull', args: {querySpec : querySpec}});
+            } else {
+                var smartSql = querySpec.smartSql;
+                // console.debug("smartSql", smartSql);
 
-            var smartSql = querySpec.smartSql;
-            // console.debug("smartSql", smartSql);
+                var soupName = '';
+                var whereField = '';
+                var soup = [];
+                var results = [];
+                var soupEntryId = null;
+                var soupElt =  null;
+                var row = null;
 
-            var soupName = '';
-            var whereField = '';
-            var soup = [];
-            var results = [];
-            var soupEntryId = null;
-            var soupElt =  null;
-            var row = null;
+                // SELECT {soupName:selectField} FROM {soupName} WHERE {soupName:whereField} IN (values)
+                var m = smartSql.match(/SELECT {(.*):(.*)} FROM {(.*)} WHERE {(.*):(.*)} IN \((.*)\)/i);
+                if (m !== null && m[1] == m[3] && m[1] == m[4]) {
+                    soupName = m[1];
+                    var selectField = m[2];
+                    whereField = m[5];
 
-            // SELECT {soupName:selectField} FROM {soupName} WHERE {soupName:whereField} IN (values)
-            var m = smartSql.match(/SELECT {(.*):(.*)} FROM {(.*)} WHERE {(.*):(.*)} IN \((.*)\)/i);
-            if (m !== null && m[1] == m[3] && m[1] == m[4]) {
-                soupName = m[1];
-                var selectField = m[2];
-                whereField = m[5];
-
-                var values = m[6].split(",");
-                for (var i=0; i<values.length; i++) {
-                    values[i] = values[i].split("'")[1]; // getting rid of surrounding '
-                }
-
-                this.checkSoup(soupName);
-                this.checkIndex(soupName, selectField);
-                this.checkIndex(soupName, whereField);
-                soup = _soups[soupName];
-
-                results = [];
-                for (soupEntryId in soup) {
-                    soupElt = soup[soupEntryId];
-                    var value = (whereField == "_soupEntryId" ? soupEntryId : this.project(soupElt, whereField));
-                    if (values.indexOf(value) >= 0) {
-                        row = [];
-                        row.push(selectField == "_soup" ? soupElt : (selectField == "_soupEntryId" ? soupEntryId : this.project(soupElt, selectField)));
-                        results.push(row);
+                    var values = m[6].split(",");
+                    for (var i=0; i<values.length; i++) {
+                        values[i] = values[i].split("'")[1]; // getting rid of surrounding '
                     }
-                }
 
-                return results;
-            }
+                    this.checkSoup(soupName);
+                    this.checkIndex(soupName, selectField);
+                    this.checkIndex(soupName, whereField);
+                    soup = _soups[soupName];
 
-
-            // SELECT * FROM {soupName} WHERE {soupName:whereField} IN (values)
-            m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} IN \((.*)\)/i);
-            if (m !== null && m[1] == m[2] ) {
-                soupName = m[1];
-                var selectField = m[2];
-                whereField = m[3];
-
-                var values = m[4].split(",");
-                for (var i=0; i<values.length; i++) {
-                    values[i] = values[i].split("'")[1]; // getting rid of surrounding '
-                }
-
-                this.checkSoup(soupName);
-                this.checkIndex(soupName, selectField);
-                this.checkIndex(soupName, whereField);
-                soup = JSON.parse(localStorage[soupName]);
-
-                results = [];
-                values.forEach(function(fieldValue){
-                    var props = {};
-                    props[whereField] = fieldValue;
-                    var found = _.where(soup, props);
-                    if (found.length > 0) {
-                        found.forEach(function(f){
-                            var row = [f._soupEntryId];
-                            row.push(f);
+                    results = [];
+                    for (soupEntryId in soup) {
+                        soupElt = soup[soupEntryId];
+                        var value = (whereField == "_soupEntryId" ? soupEntryId : this.project(soupElt, whereField));
+                        if (values.indexOf(value) >= 0) {
+                            row = [];
+                            row.push(selectField == "_soup" ? soupElt : (selectField == "_soupEntryId" ? soupEntryId : this.project(soupElt, selectField)));
                             results.push(row);
-                        });
+                        }
                     }
-                });
-                return results;
-            }
+
+                    return results;
+                }
 
 
-            // SELECT {soupName:selectField} FROM {soupName} WHERE [{soupName:whereField} = value]
-            m = smartSql.match(/SELECT \* FROM {(.*)} WHERE (.*)/i);
-            // Orig
-            // m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} = (.*)/i);
-            if (m !== null && m[1] !== null) {
-                var whereStr = m[2].split("AND");
-                console.debug('whereStr', whereStr);
+                // SELECT * FROM {soupName} WHERE {soupName:whereField} IN (values)
+                m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} IN \((.*)\)/i);
+                if (m !== null && m[1] == m[2] ) {
+                    soupName = m[1];
+                    var selectField = m[2];
+                    whereField = m[3];
 
-                var props = {};
-                var whereValue = '';
-
-                whereStr.forEach(function(str){
-                    mWhere = str.match(/{(.*):(.*)} = (.*)/i);
-                    console.debug('mWhere', mWhere);
-                    whereField = mWhere[2];
-                    console.log('mWhere[3]', mWhere[3]);
-                    if (isNaN(parseInt(mWhere[3]))) {
-                        whereValue = mWhere[3].split("'")[1];
-                    } else {
-                        whereValue = parseInt(mWhere[3]);
+                    var values = m[4].split(",");
+                    for (var i=0; i<values.length; i++) {
+                        values[i] = values[i].split("'")[1]; // getting rid of surrounding '
                     }
-                    console.log('whereValue', whereValue);
-                    props[whereField] = whereValue;
-                });
 
-                soupName = m[1];
+                    this.checkSoup(soupName);
+                    this.checkIndex(soupName, selectField);
+                    this.checkIndex(soupName, whereField);
+                    soup = JSON.parse(localStorage[soupName]);
 
-                this.checkSoup(soupName);
-                this.checkIndex(soupName, whereField);
-                soup = JSON.parse(localStorage[soupName]);
+                    results = [];
+                    values.forEach(function(fieldValue){
+                        var props = {};
+                        props[whereField] = fieldValue;
+                        var found = _.where(soup, props);
+                        if (found.length > 0) {
+                            found.forEach(function(f){
+                                var row = [f._soupEntryId];
+                                row.push(f);
+                                results.push(row);
+                            });
+                        }
+                    });
+                    return results;
+                }
 
-                results = [];
-                console.debug('props', props);
-                var matchedSoups = _.where(soup, props);
-                var matchedSoups2 = matchedSoups.map(function(el){
-                    row = [el._soupEntryId];
-                    row.push(el);
-                    return row;
-                });
-                return matchedSoups2;
-            }
 
-            // Case-insensitive sorted like query
-            // SELECT {soupName:_soup} FROM {soupName} WHERE {soupName:whereField} LIKE 'value' ORDER BY LOWER({soupName:orderByField})
-            m = smartSql.match(/SELECT {(.*):_soup} FROM {(.*)} WHERE {(.*):(.*)} LIKE '(.*)' ORDER BY LOWER\({(.*):(.*)}\)/i);
-            if (m !== null && m[1] == m[2] && m[1] == m[3] && m[1] == m[6]) {
-                soupName = m[1];
-                whereField = m[4];
-                var likeRegexp = new RegExp("^" + m[5].replace(/%/g, ".*"), "i");
-                var orderField = m[7];
+                // SELECT {soupName:selectField} FROM {soupName} WHERE [{soupName:whereField} = value]
+                m = smartSql.match(/SELECT \* FROM {(.*)} WHERE (.*)/i);
+                // Orig
+                // m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} = (.*)/i);
+                if (m !== null && m[1] !== null) {
+                    var whereStr = m[2].split("AND");
+                    console.debug('whereStr', whereStr);
 
-                this.checkSoup(soupName);
-                this.checkIndex(soupName, whereField);
-                this.checkIndex(soupName, orderField);
-                soup = _soups[soupName];
+                    var props = {};
+                    var whereValue = '';
 
-                results = [];
-                for (soupEntryId in soup) {
-                    soupElt = soup[soupEntryId];
-                    var projection = this.project(soupElt, whereField);
-                    if (projection.match(likeRegexp)) {
-                        row = [];
+                    whereStr.forEach(function(str){
+                        mWhere = str.match(/{(.*):(.*)} = (.*)/i);
+                        console.debug('mWhere', mWhere);
+                        whereField = mWhere[2];
+                        console.log('mWhere[3]', mWhere[3]);
+                        if (isNaN(parseInt(mWhere[3]))) {
+                            whereValue = mWhere[3].split("'")[1];
+                        } else {
+                            whereValue = parseInt(mWhere[3]);
+                        }
+                        console.log('whereValue', whereValue);
+                        props[whereField] = whereValue;
+                    });
+
+                    soupName = m[1];
+
+                    this.checkSoup(soupName);
+                    this.checkIndex(soupName, whereField);
+                    soup = JSON.parse(localStorage[soupName]);
+
+                    results = [];
+                    console.debug('props', props);
+                    var matchedSoups = _.where(soup, props);
+                    var matchedSoups2 = matchedSoups.map(function(el){
+                        row = [el._soupEntryId];
+                        row.push(el);
+                        return row;
+                    });
+                    return matchedSoups2;
+                }
+
+                // Case-insensitive sorted like query
+                // SELECT {soupName:_soup} FROM {soupName} WHERE {soupName:whereField} LIKE 'value' ORDER BY LOWER({soupName:orderByField})
+                m = smartSql.match(/SELECT {(.*):_soup} FROM {(.*)} WHERE {(.*):(.*)} LIKE '(.*)' ORDER BY LOWER\({(.*):(.*)}\)/i);
+                if (m !== null && m[1] == m[2] && m[1] == m[3] && m[1] == m[6]) {
+                    soupName = m[1];
+                    whereField = m[4];
+                    var likeRegexp = new RegExp("^" + m[5].replace(/%/g, ".*"), "i");
+                    var orderField = m[7];
+
+                    this.checkSoup(soupName);
+                    this.checkIndex(soupName, whereField);
+                    this.checkIndex(soupName, orderField);
+                    soup = _soups[soupName];
+
+                    results = [];
+                    for (soupEntryId in soup) {
+                        soupElt = soup[soupEntryId];
+                        var projection = this.project(soupElt, whereField);
+                        if (projection.match(likeRegexp)) {
+                            row = [];
+                            row.push(soupElt);
+                            results.push(row);
+                        }
+                    }
+
+                    results = results.sort(function(row1, row2) {
+                        var p1 = row1[0][orderField].toLowerCase();
+                        var p2 = row2[0][orderField].toLowerCase();
+                        return ( p1 > p2 ? 1 : (p1 == p2 ? 0 : -1));
+                    });
+
+                    return results;
+                }
+
+                // SELECT * FROM {soupName}
+                // NOTE  - we only supply back the soupEntryId and the object
+                //   the real SmartStore also return all fields - I don't know about
+                //   the order
+                m = smartSql.match(/SELECT \* FROM {(.*)}/i);
+                if (m !== null) {
+                    soupName = m[1];
+                    this.checkSoup(soupName);
+                    soup = JSON.parse(localStorage[soupName]);
+                    results = [];
+                    for (soupEntryId in soup) {
+                        soupElt = soup[soupEntryId];
+                        row = [soupElt._soupEntryId];
                         row.push(soupElt);
                         results.push(row);
                     }
+                    return results;
                 }
 
-                results = results.sort(function(row1, row2) {
-                    var p1 = row1[0][orderField].toLowerCase();
-                    var p2 = row2[0][orderField].toLowerCase();
-                    return ( p1 > p2 ? 1 : (p1 == p2 ? 0 : -1));
-                });
-
-                return results;
-            }
-
-            // SELECT * FROM {soupName}
-            // NOTE  - we only supply back the soupEntryId and the object
-            //   the real SmartStore also return all fields - I don't know about
-            //   the order
-            m = smartSql.match(/SELECT \* FROM {(.*)}/i);
-            if (m !== null) {
-                soupName = m[1];
-                this.checkSoup(soupName);
-                soup = JSON.parse(localStorage[soupName]);
-                results = [];
-                for (soupEntryId in soup) {
-                    soupElt = soup[soupEntryId];
-                    row = [soupElt._soupEntryId];
-                    row.push(soupElt);
-                    results.push(row);
+                // SELECT count(*) FROM {soupName}
+                m = smartSql.match(/SELECT count\(\*\) FROM {(.*)}/i);
+                if (m !== null) {
+                    soupName = m[1];
+                    this.checkSoup(soupName);
+                    soup = JSON.parse(localStorage[soupName]);
+                    var count = 0;
+                    for (soupEntryId in soup) {
+                        count++;
+                    }
+                    return [[count]];
                 }
-                return results;
-            }
 
-            // SELECT count(*) FROM {soupName}
-            m = smartSql.match(/SELECT count\(\*\) FROM {(.*)}/i);
-            if (m !== null) {
-                soupName = m[1];
-                this.checkSoup(soupName);
-                soup = JSON.parse(localStorage[soupName]);
-                var count = 0;
-                for (soupEntryId in soup) {
-                    count++;
-                }
-                return [[count]];
+                // If we get here, it means we don't support that query in the mock smartstore
+                throw new Error("SmartQuery not supported by MockSmartStore:" + smartSql);
             }
-
-            // If we get here, it means we don't support that query in the mock smartstore
-            throw new Error("SmartQuery not supported by MockSmartStore:" + smartSql);
         },
 
         querySoupFull: function(soupName, querySpec) {
@@ -1603,20 +1632,38 @@ var MockSmartStore = (function(window) {
 
 
         querySoup: function(soupName, querySpec) {
-            var results = this.querySoupFull(soupName, querySpec);
-            var cursorId = _nextCursorId++;
-            var cursor = {
-                cursorId: cursorId,
-                soupName: soupName,
-                querySpec: querySpec,
-                pageSize: querySpec.pageSize,
-                currentPageIndex: 0,
-                currentPageOrderedEntries: results.slice(0, querySpec.pageSize),
-                totalPages: Math.ceil(results.length / querySpec.pageSize)
-            };
+            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            // In electron
+                var results = ipcRenderer.sendSync('smartstore', {method: 'querySoup', args: {table : soupName, querySpec : querySpec}});
+                var cursorId = _nextCursorId++;
+                var cursor = {
+                    cursorId: cursorId,
+                    soupName: soupName,
+                    querySpec: querySpec,
+                    pageSize: querySpec.pageSize,
+                    currentPageIndex: 0,
+                    currentPageOrderedEntries: results.slice(0, querySpec.pageSize),
+                    totalPages: Math.ceil(results.length / querySpec.pageSize)
+                };
 
-            _cursors[cursorId] = cursor;
-            return cursor;
+                _cursors[cursorId] = cursor;
+                return cursor;
+            } else {
+                var results = this.querySoupFull(soupName, querySpec);
+                var cursorId = _nextCursorId++;
+                var cursor = {
+                    cursorId: cursorId,
+                    soupName: soupName,
+                    querySpec: querySpec,
+                    pageSize: querySpec.pageSize,
+                    currentPageIndex: 0,
+                    currentPageOrderedEntries: results.slice(0, querySpec.pageSize),
+                    totalPages: Math.ceil(results.length / querySpec.pageSize)
+                };
+
+                _cursors[cursorId] = cursor;
+                return cursor;
+            }
         },
 
 

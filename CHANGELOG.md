@@ -1,3 +1,18 @@
+### 2.2.0  (2017-01-23)
+
+
+#### Bug Fixes
+
+* NONE
+
+#### Features
+
+* Electron Support.
+
+#### Breaking Changes
+
+* NONE
+
 ### 2.1.3  (2016-10-17)
 
 
