@@ -7,7 +7,7 @@ angular.module('starter.controllers', [])
   });
 })
 
-.controller('DashCtrl', function($scope, userService, DashService) {
+.controller('DashCtrl', function($scope, userService, DashService, DeployService) {
   var appName = "",
     appVsn = "",
     gitStatus ="",
@@ -147,6 +147,60 @@ angular.module('starter.controllers', [])
     } else {
       localStorage.setItem('logLevel', $scope.log.level);
     }
+  };
+
+  /**
+   * Sets the current loggin level in the app
+   */
+  $scope.deploy = function(){
+    var messages = [{message : 'Uploading bundle...', type : ''}];
+    var appConfig = {};
+
+    $scope.messages = messages;
+
+    DeployService.getDetails().then(function(data){
+      console.log('data', data);
+      appConfig = data;
+      return DeployService.checkVsn(appConfig.min_mobilecaddy_version);
+    }).then(function(){
+      return DeployService.deployBunlde(appConfig);
+    }).then(function(res){
+      console.dir(res);
+      var msg = {message : res, type : 'ok', icon : "ion-checkmark-round"};
+      $scope.$apply(function() {
+        $scope.messages.push(msg);
+        msg = {message : 'Uploading cache manifest...', type : ''};
+        $scope.messages.push(msg);
+      });
+      return DeployService.uploadCachePage(appConfig);
+    }).then(function(res){
+      console.dir(res);
+      var msg = {message : res, type : 'ok', icon : "ion-checkmark-round"};
+      $scope.$apply(function() {
+        $scope.messages.push(msg);
+        msg = {message : 'Uploading start page...', type : ''};
+        $scope.messages.push(msg);
+      });
+      return DeployService.uploadStartPage(appConfig);
+    }).then(function(res){
+      console.dir(res);
+      var msg = {message : res, type : 'ok', icon : "ion-checkmark-round"};
+      $scope.$apply(function() {
+        $scope.messages.push(msg);
+        msg = {message : 'Deploy Completed successfully.', type : 'final'};
+        $scope.messages.push(msg);
+      });
+    }).catch(function(err){
+      var msg = {message : err.message, type : err.type,  icon : iconForErr(err.type)};
+      $scope.$apply(function() {
+        $scope.messages.push(msg);
+        if (err.type != 'error') {
+           msg = {message : 'Deploy Completed successfully.', type : 'final'};
+          $scope.messages.push(msg);
+        }
+      });
+      console.debug(err);
+    });
   };
 
 })

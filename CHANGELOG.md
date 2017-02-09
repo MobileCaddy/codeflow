@@ -1,3 +1,19 @@
+### 2.2.1  (2017-02-09)
+
+
+#### Bug Fixes
+
+* NONE
+
+#### Features
+
+* Deploy to Salesforce.
+
+#### Breaking Changes
+
+* NONE
+
+
 ### 2.2.0  (2017-01-23)
 
 
