@@ -27,7 +27,7 @@
 /*
  * MobileCaddy Adaption
  * Uses (more) persitent storage
- * Version: 1.0.0
+ * Version: 2.2.0
  */
 
 /**
@@ -92,13 +92,13 @@
             for (var key in interceptors) {
                 if (key === req) {
                     setTimeout(function() {
-                        try {
+                        // try {
                             interceptors[key](successCB, errorCB, args);
-                        } catch (err) {
-                            console.error("Error caught when calling " + service + ":" + action + " " + err);
-                            console.error(err.stack);
-                            errorCB(err);
-                        }
+                        // } catch (err) {
+                        //     console.error("Error caught when calling " + service + ":" + action + " " + err);
+                        //     console.error(err.stack);
+                        //     errorCB(err);
+                        // }
                     }, 0);
                     found = true;
                     break;
@@ -1175,7 +1175,7 @@ var MockSmartStore = (function(window) {
         },
 
         soupExists: function(soupName) {
-            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            if (navigator.appVersion.includes("Electron")) {
                 // In electron
                 return ipcRenderer.sendSync('smartstore', {method: 'soupExists', args: {table : soupName}});
             } else {
@@ -1209,7 +1209,7 @@ var MockSmartStore = (function(window) {
 
         registerSoup: function(soupName, indexSpecs) {
             if (!this.soupExists(soupName)) {
-                if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+                if (navigator.appVersion.includes("Electron")) {
                 // In electron
                 return ipcRenderer.sendSync('smartstore', {method: 'registerSoup', args: {table : soupName, indexSpecs : indexSpecs}});
                 } else {
@@ -1226,7 +1226,7 @@ var MockSmartStore = (function(window) {
         },
 
         removeSoup: function(soupName) {
-            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            if (navigator.appVersion.includes("Electron")) {
             // In electron
                 return ipcRenderer.sendSync('smartstore', {method: 'removeSoup', args: {table : soupName}});
             } else {
@@ -1248,7 +1248,7 @@ var MockSmartStore = (function(window) {
             // console.info('upsertSoupEntries, soupName -> ' + soupName + ', externalIdPath -> ' + externalIdPath);
             // console.info('upsertSoupEntries, soupName -> ' + soupName + ', entries -> ' + JSON.stringify(entries) + ', externalIdPath -> ' + externalIdPath);
 
-            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            if (navigator.appVersion.includes("Electron")) {
             // In electron
                 var result = ipcRenderer.sendSync('smartstore', {method: 'upsertSoupEntries', args: {table : soupName, entries : entries, externalIdPath : externalIdPath}});
                 return result;
@@ -1356,7 +1356,7 @@ var MockSmartStore = (function(window) {
         },
 
         removeFromSoup: function(soupName, entryIds) {
-            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            if (navigator.appVersion.includes("Electron")) {
             // In electron
                 return ipcRenderer.sendSync('smartstore', {method: 'removeFromSoup', args: {table : soupName, entryIds : entryIds}});
             } else {
@@ -1391,7 +1391,7 @@ var MockSmartStore = (function(window) {
 
         smartQuerySoupFull: function(querySpec) {
             // NB we don't have full support evidently
-            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            if (navigator.appVersion.includes("Electron")) {
             // In electron
                 return ipcRenderer.sendSync('smartstore', {method: 'smartQuerySoupFull', args: {querySpec : querySpec}});
             } else {
@@ -1440,34 +1440,48 @@ var MockSmartStore = (function(window) {
 
                 // SELECT * FROM {soupName} WHERE {soupName:whereField} IN (values)
                 m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} IN \((.*)\)/i);
-                if (m !== null && m[1] == m[2] ) {
+                // if (m !== null && m[1] == m[2] ) {
+                if (m !== null ) {
                     soupName = m[1];
-                    var selectField = m[2];
-                    whereField = m[3];
-
-                    var values = m[4].split(",");
-                    for (var i=0; i<values.length; i++) {
-                        values[i] = values[i].split("'")[1]; // getting rid of surrounding '
-                    }
 
                     this.checkSoup(soupName);
                     this.checkIndex(soupName, selectField);
                     this.checkIndex(soupName, whereField);
                     soup = JSON.parse(localStorage[soupName]);
 
-                    results = [];
-                    values.forEach(function(fieldValue){
-                        var props = {};
-                        props[whereField] = fieldValue;
-                        var found = _.where(soup, props);
-                        if (found.length > 0) {
-                            found.forEach(function(f){
-                                var row = [f._soupEntryId];
-                                row.push(f);
-                                results.push(row);
-                            });
+                    var tmpWhere = smartSql.split(" WHERE ");
+                    tmpWhere = tmpWhere[1].split(" AND ");
+
+                    var whereArr = tmpWhere.map(function(w){
+                        w = w.trim().match(/.*:(.*)} IN \((.*)\)/i);
+                        var matchVals = w[2].replace(/'/g, "").split(",");
+                        var matchVals2 = matchVals.map(function(m){
+                            return m.trim();
+                        });
+                        return {
+                            'field' : w[1],
+                            'matchVals' : matchVals2
+                        };
+                    });
+
+                    soup.forEach(function(rec){
+                        var matchFound = true;
+                        whereArr.forEach(function(w){
+                            console.log(rec[w.field], w.matchVals);
+                            if (matchFound && w.matchVals.includes(rec[w.field]))  {
+                                matchFound = true;
+                            } else {
+                                matchFound = false;
+                            }
+                        });
+                        console.log("matchFound", matchFound);
+                        if (matchFound) {
+                            var row = [rec._soupEntryId];
+                            row.push(rec);
+                            results.push(row);
                         }
                     });
+
                     return results;
                 }
 
@@ -1476,15 +1490,28 @@ var MockSmartStore = (function(window) {
                 m = smartSql.match(/SELECT \* FROM {(.*)} WHERE (.*)/i);
                 // Orig
                 // m = smartSql.match(/SELECT \* FROM {(.*)} WHERE {(.*):(.*)} = (.*)/i);
+                var likeQuery = false;
+                var orQuery = false;
                 if (m !== null && m[1] !== null) {
                     var whereStr = m[2].split("AND");
+                    if (whereStr == m[2]) {
+                        whereStr = m[2].split("OR");
+                        if (whereStr != m[2]) orQuery = true;
+                    }
                     console.debug('whereStr', whereStr);
+                    console.debug('orQuery', orQuery);
 
                     var props = {};
                     var whereValue = '';
 
                     whereStr.forEach(function(str){
                         mWhere = str.match(/{(.*):(.*)} = (.*)/i);
+                        if (!mWhere) {
+                            console.log("attempting LIKE match");
+                            mWhere = str.match(/{(.*):(.*)} LIKE (.*)/i);
+                            if (mWhere) likeQuery = true;
+                        }
+                        console.debug('likeQuery', likeQuery);
                         console.debug('mWhere', mWhere);
                         whereField = mWhere[2];
                         console.log('mWhere[3]', mWhere[3]);
@@ -1505,12 +1532,56 @@ var MockSmartStore = (function(window) {
 
                     results = [];
                     console.debug('props', props);
-                    var matchedSoups = _.where(soup, props);
-                    var matchedSoups2 = matchedSoups.map(function(el){
-                        row = [el._soupEntryId];
-                        row.push(el);
-                        return row;
-                    });
+                    var matchedSoups2 = [];
+                    if (!likeQuery) {
+                        var matchedSoups = _.where(soup, props);
+                        matchedSoups2 = matchedSoups.map(function(el){
+                            row = [el._soupEntryId];
+                            row.push(el);
+                            return row;
+                        });
+                    } else {
+                        console.log("Running our like matches");
+                        soup.forEach(function(el){
+                            // console.log("el", el);
+                            var matchFound = false;
+                            Object.keys(props).forEach(function(k){
+                                if ((orQuery && !matchFound) || !matchFound) {
+                                    // Only come in here if we have a chance at success
+                                    // console.log("Key", k);
+                                    var fuzzyStart = (props[k].charAt(0) == "%") ? true : false;
+                                    var fuzzyEnd = (props[k].charAt(props[k].length - 1) == "%") ? true : false;
+                                    // console.log("fuzzyStart", fuzzyStart);
+                                    // console.log("fuzzyEnd", fuzzyEnd);
+                                    var nonFuzzyStr = props[k].replace(/%/g, "");
+                                    // console.log("nonFuzzyStr", nonFuzzyStr);
+                                    var regPtn = "";
+                                    if (! fuzzyStart) {
+                                        regPtn += "^";
+                                    } else {
+                                        regPtn += "";
+                                    }
+                                    regPtn += "(" + nonFuzzyStr + ")";
+                                    if (!fuzzyEnd) {
+                                        regPtn += "$";
+                                    } else {
+                                        regPtn += "";
+                                    }
+                                    // console.log("regPtn", regPtn);
+                                    // console.log("el[k]", el[k]);
+                                    var re = new RegExp(regPtn, 'i');
+                                    matchFound = re.test(el[k]);
+                                    // console.log("matchFound", matchFound);
+                                }
+                            });
+                            // console.log("matchFound", matchFound);
+                            if (matchFound) {
+                                row = [el._soupEntryId];
+                                row.push(el);
+                                matchedSoups2.push(row);
+                            }
+                        });
+                    }
                     return matchedSoups2;
                 }
 
@@ -1632,7 +1703,7 @@ var MockSmartStore = (function(window) {
 
 
         querySoup: function(soupName, querySpec) {
-            if (navigator.appVersion.includes("mobilecaddy-desktop")) {
+            if (navigator.appVersion.includes("Electron")) {
             // In electron
                 var results = ipcRenderer.sendSync('smartstore', {method: 'querySoup', args: {table : soupName, querySpec : querySpec}});
                 var cursorId = _nextCursorId++;

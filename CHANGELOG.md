@@ -1,3 +1,20 @@
+### 2.3.0  (2018-01-23)
+
+
+#### Bug Fixes
+
+* NONE
+
+#### Features
+
+* Mulitple IN clauses in localStorage soql interface.
+* LIKE clauses in localStorage soql interface.
+
+#### Breaking Changes
+
+* NONE
+
+
 ### 2.2.0  (2017-01-23)
 
 
