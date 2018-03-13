@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-#var express = require('express'),
+var express = require('express'),
     request = require('request'),
     bodyParser = require('body-parser'),
     fs = require('fs-extra'),
