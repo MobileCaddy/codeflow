@@ -4,9 +4,9 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     fs = require('fs-extra'),
     app = express();
-var record = (process.argv[2]) ? true : false;
+var record = (process.argv[3]) ? true : false;
 
-const fPath = 'mock';
+const fPath = 'www/mock';
 const p2mPath = fPath + "/p2mRefreshTable";
 
 // Prep directories for writing to, if we need to
