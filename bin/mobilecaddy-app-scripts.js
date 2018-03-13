@@ -7,6 +7,9 @@ if (process.argv.length > 2) {
   	case 'setup':
   		copySetupFiles();
   		break;
+  	case 'cors':
+  		startCorsServer();
+  		break;
   	default:
   		console.error('Unknown task: ' + process.argv[2]);
   }
@@ -50,4 +53,8 @@ function copySetupFiles(){
     if (err) throw err;
     console.log('...');
 	});
+}
+
+function startCorsServer() {
+	require('../js/cors-server');
 }
