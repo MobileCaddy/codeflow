@@ -31,7 +31,6 @@ function copySetupFiles(){
 	    fs.mkdirSync(destWWWDir);
 	}
 	const sourceCodeFlowDir = 'node_modules/mobilecaddy-codeflow/js/';
-	const sourceForceJSDir = 'node_modules/forcejs/';
 
 	fs.copyFile(sourceCodeFlowDir + 'MockCordova.js', destJsDir + '/MockCordova.js', (err) => {
     if (err) throw err;
@@ -45,7 +44,7 @@ function copySetupFiles(){
     if (err) throw err;
     console.log('...');
 	});
-	fs.copyFile(sourceForceJSDir + 'force.js', destJsDir + '/force.js', (err) => {
+	fs.copyFile(sourceCodeFlowDir + 'force.js', destJsDir + '/force.js', (err) => {
     if (err) throw err;
     console.log('...');
 	});
