@@ -14,9 +14,9 @@
     "underscore": "^1.8.3",
     "forcejs": "git+https://github.com/toddhalfpenny/forcejs.git",
     "angular-ui-grid": "^3.0.7",
-    "body-parser": "^1.14.1",
-    "express": "^4.13.3",
-    "fs-extra": "^0.24.0",
-    "request": "^2.65.0"
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "fs-extra": "^4.0.3",
+    "request": "^2.79.0"
   }
 }
