@@ -11,9 +11,7 @@
   },
   "preferGlobal": false,
   "dependencies": {
-    "jquery": ">=2.0.0",
-    "underscore": ">=1.5.2",
-    "es6-promise": "3.3.1",
+    "underscore": "^1.8.3",
     "forcejs": "git+https://github.com/toddhalfpenny/forcejs.git",
     "angular-ui-grid": "^3.0.7",
     "body-parser": "^1.14.1",
