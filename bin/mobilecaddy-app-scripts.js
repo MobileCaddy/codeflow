@@ -31,6 +31,7 @@ function copySetupFiles(){
 	    fs.mkdirSync(destWWWDir);
 	}
 	const sourceCodeFlowDir = 'node_modules/mobilecaddy-codeflow/js/';
+  const underscoreDir = 'node_modules/underscore/';
 
 	fs.copyFile(sourceCodeFlowDir + 'MockCordova.js', destJsDir + '/MockCordova.js', (err) => {
     if (err) throw err;
@@ -48,6 +49,10 @@ function copySetupFiles(){
     if (err) throw err;
     console.log('...');
 	});
+  fs.copyFile(underscoreDir + 'underscore-min.js', destJsDir + '/underscore-min.js', (err) => {
+    if (err) throw err;
+    console.log('...');
+  });
 	fs.copyFile('src/oauthcallback.html', destWWWDir + '/oauthcallback.html', (err) => {
     if (err) throw err;
     console.log('...');
