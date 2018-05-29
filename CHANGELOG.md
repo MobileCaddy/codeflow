@@ -1,3 +1,18 @@
+### 2.4.0  (2018-05-29)
+
+
+#### Bug Fixes
+
+* NONE
+
+#### Features
+
+* SOQL syntax includes support for 'SELECT {TABLE:FIELD} FROM...'
+
+#### Breaking Changes
+
+* NONE
+
 ### 2.3.0  (2018-01-23)
 
 
@@ -13,6 +28,7 @@
 #### Breaking Changes
 
 * NONE
+
 
 
 ### 2.2.0  (2017-01-23)
