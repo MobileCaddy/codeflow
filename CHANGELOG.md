@@ -1,3 +1,18 @@
+### 2.3.1  (2018-06-16)
+
+
+#### Bug Fixes
+
+* NONE
+
+#### Features
+
+* v2.3.1 MockCordova - Fix incorrect response format for SOQL queries with LIKE
+
+#### Breaking Changes
+
+* NONE
+
 ### 2.3.0  (2018-01-23)
 
 
