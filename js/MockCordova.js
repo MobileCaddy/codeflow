@@ -27,7 +27,7 @@
 /*
  * MobileCaddy Adaption
  * Uses (more) persitent storage
- * Version: 2.3.1
+ * Version: 2.3.2
  */
 
 /**
@@ -773,6 +773,12 @@ cordova.define('com.salesforce.plugin.smartstore', function(
     return logLevel;
   };
 
+  // ====== alterSoup =======
+  var alterSoup = function(table, spec, _, successCallback) {
+    console.log("let's pretend I've altered the soup", table, spec);
+    successCallback();
+  };
+
   // ====== querySpec factory methods
   // Returns a query spec that will page through all soup entries in order by the given path value
   // Internally it simply does a range query with null begin and end keys
@@ -1030,6 +1036,7 @@ cordova.define('com.salesforce.plugin.smartstore', function(
    * Part of the module that is public
    */
   module.exports = {
+    alterSoup: alterSoup,
     getLogLevel: getLogLevel,
     setLogLevel: setLogLevel,
     buildAllQuerySpec: buildAllQuerySpec,
