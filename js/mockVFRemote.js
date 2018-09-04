@@ -24,65 +24,65 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 /******************************************************
  *    I N T E R N  A L    F U N C T I O N S
  *****************************************************/
 
 function queryMockJsonFile(remoteCall, success) {
-	myUri = "../../mock/" + remoteCall + ".json";
+  myUri = '../../mock/' + remoteCall + '.json';
 
-	httpRequest = new XMLHttpRequest();
-	httpRequest.open('GET', myUri );
-	httpRequest.send();
+  httpRequest = new XMLHttpRequest();
+  httpRequest.open('GET', myUri);
+  httpRequest.send();
 
-	httpRequest.onreadystatechange = function(){
-		// Process the server response here.
-		if (httpRequest.readyState === XMLHttpRequest.DONE) {
-		  if (httpRequest.status === 200) {
-				console.log("Read from file " + myUri + " OK");
-				success(httpRequest.responseText);
-		  } else {
-		  	console.error("Error reading from file" + myUri + " -> " + JSON.stringify(e));
-				success([]);
-		  }
-
-		}
-	}
+  httpRequest.onreadystatechange = function() {
+    // Process the server response here.
+    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+      if (httpRequest.status === 200) {
+        console.log('Read from file ' + myUri + ' OK');
+        success(httpRequest.responseText);
+      } else {
+        console.error(
+          'Error reading from file' + myUri + ' -> ' + JSON.stringify(e)
+        );
+        success([]);
+      }
+    }
+  };
 }
 function queryMockJsonTableFile(remoteCall, tableName, success) {
-	var timeNow = new Date().valueOf();
-	myUri = "../../mock/" + remoteCall + "/" + tableName + ".json";
+  var timeNow = new Date().valueOf();
+  myUri = '../../mock/' + remoteCall + '/' + tableName + '.json';
 
+  httpRequest = new XMLHttpRequest();
+  httpRequest.open('GET', myUri);
+  httpRequest.send();
 
-	httpRequest = new XMLHttpRequest();
-	httpRequest.open('GET', myUri );
-	httpRequest.send();
-
-	httpRequest.onreadystatechange = function(){
-		// Process the server response here.
-		if (httpRequest.readyState === XMLHttpRequest.DONE) {
-		  if (httpRequest.status === 200) {
-				console.log("Read from file " + myUri + " OK");
-				var data = JSON.parse(httpRequest.responseText);
-				if (data.lastRefreshDatetime) data.lastRefreshDatetime = timeNow;
-				success(httpRequest.responseText);
-		  } else {
-		  	console.error("Error reading from file" + myUri + " -> " + JSON.stringify(e));
-				success([]);
-		  }
-
-		}
-	}
+  httpRequest.onreadystatechange = function() {
+    // Process the server response here.
+    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+      if (httpRequest.status === 200) {
+        console.log('Read from file ' + myUri + ' OK');
+        var data = JSON.parse(httpRequest.responseText);
+        if (data.lastRefreshDatetime) data.lastRefreshDatetime = timeNow;
+        success(httpRequest.responseText);
+      } else {
+        console.error(
+          'Error reading from file' + myUri + ' -> ' + JSON.stringify(e)
+        );
+        success([]);
+      }
+    }
+  };
 }
 
-
 function makeid() {
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var text = '';
+  var possible =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-  for( var i=0; i < 18; i++ )
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  for (var i = 0; i < 18; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
 
   return text;
 }
@@ -93,36 +93,75 @@ function makeid() {
  * @param {json} inJson
  */
 function buildConnSessResp(inJson) {
-	console.debug('inJson', JSON.stringify(inJson));
-	try {
-		inJson = JSON.parse(inJson);
-		var inRecs = inJson.records;
-		console.debug('inRecs', JSON.stringify(inRecs));
-		var us = inRecs.map(function(rec) {
-			console.debug('rec', JSON.stringify(rec));
-			var idField = _.findWhere(rec.fields, {'name': "Id"});
-			return ({"Id" : idField.value,"sm" : null,"pc" : "U"});
-		});
-		return JSON.stringify({
-			"mt"   : "Connection_Session__mc",
-			"cp"   : inJson.connSessProxyId,
-			"csId" : makeid(),
-			"ps"   : "M2P UP - Record Processed",
-			"sdfb" : "D",
-			"hdfb" : "D",
-			"ufbe" : "K",
-			"stbe" : "D",
-			"ifbe" : "K",
-			"us"   : us,
-			"uf"   : []
-			});
-	} catch(err) {
-		console.error(err);
-		throw(err);
-	}
+  console.debug('inJson', JSON.stringify(inJson));
+  try {
+    inJson = JSON.parse(inJson);
+    var inRecs = inJson.records;
+    console.debug('inRecs', JSON.stringify(inRecs));
+    var us = inRecs.map(function(rec) {
+      console.debug('rec', JSON.stringify(rec));
+      var idField = _.findWhere(rec.fields, { name: 'Id' });
+      return { Id: idField.value, sm: null, pc: 'U' };
+    });
+    return JSON.stringify({
+      mt: 'Connection_Session__mc',
+      cp: inJson.connSessProxyId,
+      csId: makeid(),
+      ps: 'M2P UP - Record Processed',
+      sdfb: 'D',
+      hdfb: 'D',
+      ufbe: 'K',
+      stbe: 'D',
+      ifbe: 'K',
+      us: us,
+      uf: []
+    });
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 }
 
-
+/**
+ * Builds a successful response for an m2pUpdate for any table
+ * table
+ * @param {json} inJson
+ */
+function buildM2PResp(inJson) {
+  console.debug('inJson', JSON.stringify(inJson));
+  try {
+    inJson = JSON.parse(inJson);
+    var inRecs = inJson.records;
+    console.debug('inRecs', JSON.stringify(inRecs));
+    var us = [],
+      is = [];
+    inRecs.forEach(rec => {
+      console.debug('rec', JSON.stringify(rec));
+      var idField = _.findWhere(rec.fields, { name: 'Id' });
+      if (rec.RecordCrud == 'I') {
+        is.push({ Id: makeid(), sm: null, pc: myPc, pd: idField.value });
+      } else {
+        us.push({ Id: makeid(), sm: null, pc: 'U' });
+      }
+    });
+    return JSON.stringify({
+      mt: inJson.MobileTable,
+      cp: inJson.connSessProxyId,
+      csId: makeid(),
+      ps: 'M2P UP - Record Processed',
+      sdfb: 'D',
+      hdfb: 'D',
+      ufbe: 'K',
+      stbe: 'D',
+      ifbe: 'K',
+      us: us,
+      uf: is
+    });
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
 
 /******************************************************
  *    G L O B A L    B I T S
@@ -139,86 +178,91 @@ Visualforce.remoting.Manager = {};
 
 // Object together with the method declarations
 Visualforce.remoting.Manager = {
-	getAction: function() {
-		var callName = arguments[0].split(".").pop();
-		switch (callName) {
-  		case 'p2mRefreshRecTypeDOTs' :
-			return true;
-		default:
-			return true;
-		}
-	},
+  getAction: function() {
+    var callName = arguments[0].split('.').pop();
+    switch (callName) {
+      case 'p2mRefreshRecTypeDOTs':
+        return true;
+      default:
+        return true;
+    }
+  },
 
   invokeAction: function() {
-  	// I'm assuming that the penultimate and last args are success and error callbacks.
-  	var callName = arguments[0].split(".").pop();
-  	var success = arguments[arguments.length -2];
-  	var error = arguments[arguments.length -1];
-		var resultObj = {};
-  	var eventObj = {"status" : "OK"};
+    // I'm assuming that the penultimate and last args are success and error callbacks.
+    var callName = arguments[0].split('.').pop();
+    var success = arguments[arguments.length - 2];
+    var error = arguments[arguments.length - 1];
+    var resultObj = {};
+    var eventObj = { status: 'OK' };
 
-  	switch (callName) {
-  		case 'getAudInfo' :
-				queryMockJsonFile('getAudInfo', function(data) {
-					success(data, eventObj);
-				});
-				break;
-  		case 'getSystemDataSoupDefinition' :
-				queryMockJsonFile('getSystemDataSoupDefinition', function(data) {
-					success(data, eventObj);
-				});
-				break;
-  		case 'getSysDataSoupVariables' :
-				resultObj = '[]';
-    		success(resultObj, eventObj);
-				break;
-  		case 'getDefsForSObjectMobileTables' :
-				queryMockJsonFile('getDefsForSObjectMobileTables', function(data) {
-					success(data, eventObj);
-				});
-				break;
-  		case 'getRecordTypeDots' :
-				queryMockJsonFile('getRecordTypeDots', function(data) {
-					success(data, eventObj);
-				});
-				break;
-  		case 'p2mRefreshRecTypeDOTs' :
-				queryMockJsonFile('p2mRefreshRecTypeDOTs', function(data) {
-					success(data, eventObj);
-				});
-				break;
-  		case 'm2pCSStatusCheck' :
-  			console.info('m2pCSStatusCheck - - - - - - - - - - - - - -');
-  			console.dir(arguments);
-				resultObj = '{"status" : "OK", "cs_fc_sc" : "Received Processed"}';
-    		success(resultObj, eventObj);
-				break;
-  		case 'p2mRefreshTable' :
-				console.log("mockVfRemote p2mRefreshTable -> " + arguments[3]);
-				queryMockJsonTableFile('p2mRefreshTable', arguments[3], function(data) {
-					success(data, eventObj);
-				});
-				break;
-  		case 'm2pUpdateTable' :
-				console.log("mockVfRemote m2pUpdateTable -> " + arguments[3]);
-				if ( arguments[3] == "Connection_Session__mc" ) {
-					// need to spoof response so app behaves OK
-					var result = buildConnSessResp(arguments[4]);
-					console.time('TODD');
-					setTimeout(function(){
-						console.timeEnd('TODD');
-						success(result,eventObj);
-						}, 500);
-				} else {
-					queryMockJsonTableFile('m2pUpdateTable', arguments[3], function(data) {
-						success(data, eventObj);
-					});
-				}
-				break;
-			default :
-				console.error("ERROR!: mockVfRemote, Unknown callName -> " + callName);
-  	}
+    switch (callName) {
+      case 'getAudInfo':
+        queryMockJsonFile('getAudInfo', function(data) {
+          success(data, eventObj);
+        });
+        break;
+      case 'getSystemDataSoupDefinition':
+        queryMockJsonFile('getSystemDataSoupDefinition', function(data) {
+          success(data, eventObj);
+        });
+        break;
+      case 'getSysDataSoupVariables':
+        resultObj = '[]';
+        success(resultObj, eventObj);
+        break;
+      case 'getDefsForSObjectMobileTables':
+        queryMockJsonFile('getDefsForSObjectMobileTables', function(data) {
+          success(data, eventObj);
+        });
+        break;
+      case 'getRecordTypeDots':
+        queryMockJsonFile('getRecordTypeDots', function(data) {
+          success(data, eventObj);
+        });
+        break;
+      case 'p2mRefreshRecTypeDOTs':
+        queryMockJsonFile('p2mRefreshRecTypeDOTs', function(data) {
+          success(data, eventObj);
+        });
+        break;
+      case 'm2pCSStatusCheck':
+        console.info('m2pCSStatusCheck - - - - - - - - - - - - - -');
+        console.dir(arguments);
+        resultObj = '{"status" : "OK", "cs_fc_sc" : "Received Processed"}';
+        success(resultObj, eventObj);
+        break;
+      case 'p2mRefreshTable':
+        console.log('mockVfRemote p2mRefreshTable -> ' + arguments[3]);
+        queryMockJsonTableFile('p2mRefreshTable', arguments[3], function(data) {
+          success(data, eventObj);
+        });
+        break;
+      case 'm2pUpdateTable':
+        console.log('mockVfRemote m2pUpdateTable -> ' + arguments[3]);
+        if (arguments[3] == 'Connection_Session__mc') {
+          // need to spoof response so app behaves OK
+          var result = buildConnSessResp(arguments[4]);
+          console.time('TODD');
+          setTimeout(function() {
+            console.timeEnd('TODD');
+            success(result, eventObj);
+          }, 500);
+        } else {
+          // queryMockJsonTableFile('m2pUpdateTable', arguments[3], function(data) {
+          // success(data, eventObj);
+          var result = buildM2PResp(arguments[4]);
+          console.time('TODD');
+          setTimeout(function() {
+            console.timeEnd('TODD');
+            success(result, eventObj);
+          }, 500);
+        }
+        break;
+      default:
+        console.error('ERROR!: mockVfRemote, Unknown callName -> ' + callName);
     }
+  }
 };
 
 window.Visualforce = Visualforce;
