@@ -81,14 +81,14 @@ function recordResponse(req, response, body) {
 
 function storeFileLocally(body) {
   // console.log('Storing file: /www/mock/files/' + body.filename);
-  fs.writeFile(
-    'www/mock/files/' + body.filename,
-    body.base64,
-    'base64',
-    function(err) {
-      if (err) console.log(err);
-    }
-  );
+  var dir = 'www/mock/files';
+
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+  fs.writeFile(dir + '/' + body.filename, body.base64, 'base64', function(err) {
+    if (err) console.log(err);
+  });
   //   bodyParams = JSON.parse(body);
   //   console.log('filename', filename);
 }
