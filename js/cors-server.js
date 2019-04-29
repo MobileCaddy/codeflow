@@ -47,6 +47,9 @@ function recordResponse(req, response, body) {
       case 'getAUDInfo001':
         fName = 'getAudInfo.json';
         break;
+        case 'getAppConfig001':
+          fName = 'getAppConfig.json';
+          break;
       case 'getSystemDataSoupDefinition001':
         fName = 'getSystemDataSoupDefinition.json';
         break;
@@ -68,6 +71,9 @@ function recordResponse(req, response, body) {
         break;
       default:
         fName = '';
+    }
+    if (typeof(body) == 'object') {
+      body = JSON.stringify(body);
     }
     if (fName !== '') {
       fs.writeFile(fPath2 + '/' + fName, body, function(err) {
