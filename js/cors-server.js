@@ -125,23 +125,42 @@ app.all('*', function(req, res, next) {
         });
         return;
       }
-      request(
-        {
-          url: targetURL + req.url,
-          method: req.method,
-          json: req.body,
-          headers: { Authorization: req.header('Authorization') }
-        },
-        function(error, response, body) {
-          if (error) {
-            console.error('error: ' + error);
-            if (typeof response !== 'undefined')
-              console.error('error: ' + response.statusCode);
-          } else {
-            if (record) recordResponse(req, response, body);
+      if (req.method === 'GET') {
+        request(
+          {
+            url: targetURL + req.url,
+            method: req.method,
+            headers: { Authorization: req.header('Authorization') }
+          },
+          function(error, response, body) {
+            if (error) {
+              console.error('error: ' + error);
+              if (typeof response !== 'undefined')
+                console.error('error: ' + response.statusCode);
+            } else {
+              if (record) recordResponse(req, response, body);
+            }
           }
-        }
-      ).pipe(res);
+        ).pipe(res);
+      } else {
+        request(
+          {
+            url: targetURL + req.url,
+            method: req.method,
+            json: req.body,
+            headers: { Authorization: req.header('Authorization') }
+          },
+          function(error, response, body) {
+            if (error) {
+              console.error('error: ' + error);
+              if (typeof response !== 'undefined')
+                console.error('error: ' + response.statusCode);
+            } else {
+              if (record) recordResponse(req, response, body);
+            }
+          }
+        ).pipe(res);
+      }
     }
   }
 });

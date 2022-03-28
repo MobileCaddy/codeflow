@@ -1,3 +1,18 @@
+### 2.3.2  (2022-03-28)
+
+
+#### Bug Fixes
+
+* Don't send `json` for GET requests. Caused SF to sometimes reply with 411 (Content length required)
+
+#### Features
+
+* NONE
+
+#### Breaking Changes
+
+* NONE
+
 ### 2.3.1  (2018-06-16)
 
 
