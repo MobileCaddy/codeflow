@@ -220,10 +220,24 @@ var force = (function () {
             url += '?' + toQueryString(obj.params);
         }
 
+        if (obj.fileExtension == 'webp'){
+            xhr.responseType = "arraybuffer";
+        }
+
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status > 199 && xhr.status < 300) {
-                    if (success) success(xhr.responseText ? JSON.parse(xhr.responseText) : undefined);
+                    if (success) {
+                        if (xhr.responseType !== 'arraybuffer') {
+                            try {
+                                success(xhr.responseText ? JSON.parse(xhr.responseText) : undefined);
+                            } catch(e) {
+                                success(xhr.responseText); 
+                            }
+                        } else {
+                            success(xhr.response);
+                        }
+                    }
                 } else if (xhr.status === 401 && oauth.refresh_token) {
                     refreshToken(
                         function () {
