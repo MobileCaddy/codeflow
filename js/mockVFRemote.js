@@ -29,9 +29,9 @@
  *****************************************************/
 
 function queryMockJsonFile(remoteCall, success) {
-  myUri = '../../mock/' + remoteCall + '.json';
+  let myUri = '../../mock/' + remoteCall + '.json';
 
-  httpRequest = new XMLHttpRequest();
+  let httpRequest = new XMLHttpRequest();
   httpRequest.open('GET', myUri);
   httpRequest.send();
 
@@ -43,7 +43,7 @@ function queryMockJsonFile(remoteCall, success) {
         success(httpRequest.responseText);
       } else {
         console.error(
-          'Error reading from file' + myUri + ' -> ' + JSON.stringify(e)
+          'Error reading from file' + myUri,httpRequest
         );
         success([]);
       }
@@ -52,9 +52,9 @@ function queryMockJsonFile(remoteCall, success) {
 }
 function queryMockJsonTableFile(remoteCall, tableName, success) {
   var timeNow = new Date().valueOf();
-  myUri = '../../mock/' + remoteCall + '/' + tableName + '.json';
+  let myUri = '../../mock/' + remoteCall + '/' + tableName + '.json';
 
-  httpRequest = new XMLHttpRequest();
+  let httpRequest = new XMLHttpRequest();
   httpRequest.open('GET', myUri);
   httpRequest.send();
 
@@ -68,7 +68,7 @@ function queryMockJsonTableFile(remoteCall, tableName, success) {
         success(httpRequest.responseText);
       } else {
         console.error(
-          'Error reading from file' + myUri + ' -> ' + JSON.stringify(e)
+          'Error reading from file' + myUri, httpRequest
         );
         success([]);
       }
@@ -257,7 +257,7 @@ Visualforce.remoting.Manager = {
           // queryMockJsonTableFile('m2pUpdateTable', arguments[3], function(data) {
           // 	success(data, eventObj);
           // });
-          var result = buildM2PResp(arguments[4]);
+          let result = buildM2PResp(arguments[4]);
           console.time('TODD');
           setTimeout(function() {
             console.timeEnd('TODD');

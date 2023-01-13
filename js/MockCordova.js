@@ -313,6 +313,7 @@ cordova.define('salesforce/util/bootstrap', function(require, exports, module) {
     if (typeof connType !== 'undefined') {
       // Cordova's connection object.  May be more accurate?
       return (
+        !window.Connection ||
         connType &&
         connType != Connection.NONE &&
         connType != Connection.UNKNOWN
@@ -1080,7 +1081,7 @@ cordova.define('cordova/plugin/Camera', function(require, exports, module) {
   /**
    * Gets a picture from source defined by "options.sourceType", and returns the
    * image as defined by the "options.destinationType" option.
-  
+
    * The defaults are sourceType=CAMERA and destinationType=FILE_URI.
    *
    * @param {Function} successCallback
@@ -1694,10 +1695,16 @@ var MockSmartStore = (function(window) {
 
           var whereArr = whereStr.map(function(w) {
             w = w.trim().match(/.*:(.*)} IN \((.*)\)/i);
-            var matchVals = w[2].replace(/'/g, '').split(',');
+
+            var matchVals = w[2].split(',');
             var matchVals2 = matchVals.map(function(m) {
-              return m.trim();
+              if (m.includes("'")) { // is a string
+                return m.replace(/'/g, '').trim();
+              } else {
+                return Number(m); // TODO prob should add boolean too
+              }
             });
+
             return {
               field: w[1],
               matchVals: matchVals2
