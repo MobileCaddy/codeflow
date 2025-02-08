@@ -1,3 +1,12 @@
+### 2.3.3  (2024-08-28)
+
+
+#### Bug Fixes
+
+* Correct matching SOQL WHERE  clauses in MockCordova
+* Multiple MockVFRemote updates
+
+
 ### 2.3.2  (2022-03-28)
 
 

@@ -27,7 +27,7 @@
 /*
  * MobileCaddy Adaption
  * Uses (more) persitent storage
- * Version: 2.3.0
+ * Version: 2.3.3
  */
 
 /**
@@ -136,30 +136,30 @@
 })(window);
 
 /*
- * Copyright (c) 2012-14, salesforce.com, inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided
- * that the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list of conditions and the
- * following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided with the distribution.
- *
- * Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+   * Copyright (c) 2012-14, salesforce.com, inc.
+   * All rights reserved.
+   *
+   * Redistribution and use in source and binary forms, with or without modification, are permitted provided
+   * that the following conditions are met:
+   *
+   * Redistributions of source code must retain the above copyright notice, this list of conditions and the
+   * following disclaimer.
+   *
+   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
+   * the following disclaimer in the documentation and/or other materials provided with the distribution.
+   *
+   * Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
+   * promote products derived from this software without specific prior written permission.
+   *
+   * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+   * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+   * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+   * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+   * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+   * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   * POSSIBILITY OF SUCH DAMAGE.
+   */
 
 // Version this js was shipped with
 var SALESFORCE_MOBILE_SDK_VERSION = '2.2.0';
@@ -313,6 +313,7 @@ cordova.define('salesforce/util/bootstrap', function(require, exports, module) {
     if (typeof connType !== 'undefined') {
       // Cordova's connection object.  May be more accurate?
       return (
+        !window.Connection ||
         connType &&
         connType != Connection.NONE &&
         connType != Connection.UNKNOWN
@@ -773,6 +774,12 @@ cordova.define('com.salesforce.plugin.smartstore', function(
     return logLevel;
   };
 
+  // ====== alterSoup =======
+  var alterSoup = function(table, spec, _, successCallback) {
+    console.log("let's pretend I've altered the soup", table, spec);
+    successCallback();
+  };
+
   // ====== querySpec factory methods
   // Returns a query spec that will page through all soup entries in order by the given path value
   // Internally it simply does a range query with null begin and end keys
@@ -1030,6 +1037,7 @@ cordova.define('com.salesforce.plugin.smartstore', function(
    * Part of the module that is public
    */
   module.exports = {
+    alterSoup: alterSoup,
     getLogLevel: getLogLevel,
     setLogLevel: setLogLevel,
     buildAllQuerySpec: buildAllQuerySpec,
@@ -1071,15 +1079,15 @@ cordova.define('cordova/plugin/Camera', function(require, exports, module) {
   }
 
   /**
- * Gets a picture from source defined by "options.sourceType", and returns the
- * image as defined by the "options.destinationType" option.
+   * Gets a picture from source defined by "options.sourceType", and returns the
+   * image as defined by the "options.destinationType" option.
 
- * The defaults are sourceType=CAMERA and destinationType=FILE_URI.
- *
- * @param {Function} successCallback
- * @param {Function} errorCallback
- * @param {Object} options
- */
+   * The defaults are sourceType=CAMERA and destinationType=FILE_URI.
+   *
+   * @param {Function} successCallback
+   * @param {Function} errorCallback
+   * @param {Object} options
+   */
   cameraExport.getPicture = function(successCallback, errorCallback, options) {
     options = options || {};
     // successCallback required
@@ -1278,30 +1286,30 @@ var QuerySpec = navigator.smartstore.QuerySpec;
 var StoreCursor = navigator.smartstore.StoreCursor;
 
 /*
- * Copyright (c) 2012, salesforce.com, inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided
- * that the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list of conditions and the
- * following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
- * the following disclaimer in the documentation and/or other materials provided with the distribution.
- *
- * Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+   * Copyright (c) 2012, salesforce.com, inc.
+   * All rights reserved.
+   *
+   * Redistribution and use in source and binary forms, with or without modification, are permitted provided
+   * that the following conditions are met:
+   *
+   * Redistributions of source code must retain the above copyright notice, this list of conditions and the
+   * following disclaimer.
+   *
+   * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
+   * the following disclaimer in the documentation and/or other materials provided with the distribution.
+   *
+   * Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
+   * promote products derived from this software without specific prior written permission.
+   *
+   * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+   * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+   * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+   * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+   * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+   * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   * POSSIBILITY OF SUCH DAMAGE.
+   */
 
 /**
  * MockSmartStore: a JavaScript SmartStore
@@ -1374,7 +1382,7 @@ var MockSmartStore = (function(window) {
 
     checkSoup: function(soupName) {
       if (!this.soupExists(soupName)) {
-        console.trace("");
+        console.trace('');
         throw new Error('Soup: ' + soupName + ' does not exist');
       }
     },
@@ -1655,8 +1663,18 @@ var MockSmartStore = (function(window) {
         var soupEntryId = null;
         var soupElt = null;
         var row = null;
+        var selectFieldsArr = [];
+        var whereRegex;
+        var fWhere;
+        var mWhere;
+        var selectFields;
+        var orQuery = false;
+        var whereStr;
 
         // SELECT ... WHERE ... IN (values)
+        // var m = smartSql.match(
+        // /SELECT\s+(.*)\s+FROM\s+{(.*)}\s+WHERE\s+{(.*):(.*)}\s+IN\s+\((.*)\)/i;
+        // );
         var m = smartSql.match(
           /SELECT\s+(.*)\s+FROM\s+{(.*)}\s+WHERE\s+{(.*):(.*)}\s+IN\s+\((.*)\)/i
         );
@@ -1669,21 +1687,31 @@ var MockSmartStore = (function(window) {
           soup = JSON.parse(localStorage[soupName]);
 
           var tmpWhere = smartSql.split(' WHERE ');
-          tmpWhere = tmpWhere[1].split(' AND ');
+          whereStr = tmpWhere[1].split(' AND ');
+          if (whereStr[0] == tmpWhere[1]) {
+            whereStr = tmpWhere[1].split('OR');
+            if (whereStr != tmpWhere[1]) orQuery = true;
+          }
 
-          var whereArr = tmpWhere.map(function(w) {
+          var whereArr = whereStr.map(function(w) {
             w = w.trim().match(/.*:(.*)} IN \((.*)\)/i);
-            var matchVals = w[2].replace(/'/g, '').split(',');
+
+            var matchVals = w[2].split(',');
             var matchVals2 = matchVals.map(function(m) {
-              return m.trim();
+              if (m.includes("'")) { // is a string
+                return m.replace(/'/g, '').trim();
+              } else {
+                return Number(m); // TODO prob should add boolean too
+              }
             });
+
             return {
               field: w[1],
               matchVals: matchVals2
             };
           });
 
-          var selectFields = m[1];
+          selectFields = m[1];
           //   console.log('selectFields', selectFields);
           if (selectFields !== '*') {
             selectFieldsArr = [];
@@ -1699,15 +1727,25 @@ var MockSmartStore = (function(window) {
           //   console.log('selectFields', selectFields);
 
           soup.forEach(function(rec) {
-            var matchFound = true;
-            whereArr.forEach(function(w) {
-              //   console.log(rec[w.field], w.matchVals);
-              if (matchFound && w.matchVals.includes(rec[w.field])) {
-                matchFound = true;
-              } else {
-                matchFound = false;
-              }
-            });
+            var matchFound = false;
+            if (orQuery) {
+              whereArr.forEach(function(w) {
+                //   console.log(rec[w.field], w.matchVals);
+                if (w.matchVals.includes(rec[w.field])) {
+                  matchFound = true;
+                }
+              });
+            } else {
+              matchFound = true;
+              whereArr.forEach(function(w) {
+                //   console.log(rec[w.field], w.matchVals);
+                if (matchFound && w.matchVals.includes(rec[w.field])) {
+                  matchFound = true;
+                } else {
+                  matchFound = false;
+                }
+              });
+            }
             // console.log('matchFound', matchFound);
             if (matchFound) {
               var row = [];
@@ -1729,11 +1767,10 @@ var MockSmartStore = (function(window) {
         // SELECT ... FROM ... WHERE [ = / LIKE ]]
         m = smartSql.match(/SELECT\s+(.*)\s+FROM\s+{(.*)}\s+WHERE\s+(.*)/i);
         var likeQuery = false;
-        var orQuery = false;
         if (m !== null && m[2] !== null) {
-          var whereStr = m[3].split('AND');
+          whereStr = m[3].split(' AND ');
           if (whereStr == m[3]) {
-            whereStr = m[3].split('OR');
+            whereStr = m[3].split(' OR ');
             if (whereStr != m[3]) orQuery = true;
           }
           //   console.debug('whereStr', whereStr);
@@ -1764,7 +1801,7 @@ var MockSmartStore = (function(window) {
 
           soupName = m[2];
 
-          var selectFields = m[1];
+          selectFields = m[1];
           //   console.log('selectFields', selectFields);
           if (selectFields !== '*') {
             selectFieldsArr = [];
@@ -1788,19 +1825,43 @@ var MockSmartStore = (function(window) {
           //   console.debug('props', props);
           var matchedSoups2 = [];
           if (!likeQuery) {
-            var matchedSoups = _.where(soup, props);
-            matchedSoups2 = matchedSoups.map(function(el) {
-              var row = [];
-              if (selectFields == '*') {
-                row = [el._soupEntryId];
-                row.push(el);
-              } else {
-                // filteredEl = {};
-                selectFields.forEach(attr => row.push(el[attr]));
-                // row.push(filteredEl);
-              }
-              return row;
-            });
+            if (orQuery) {
+              var myMatchedSoups = [];
+              // Go through each prop and get records that match
+              Object.keys(props).forEach(function(k) {
+                var tmpProp = {};
+                tmpProp[k] = props[k];
+                var matchedSoups = _.where(soup, tmpProp);
+                var tmpMatchedSoups = matchedSoups.map(function(el) {
+                  var row = [];
+                  if (selectFields == '*') {
+                    row = [el._soupEntryId];
+                    row.push(el);
+                  } else {
+                    // filteredEl = {};
+                    selectFields.forEach(attr => row.push(el[attr]));
+                    // row.push(filteredEl);
+                  }
+                  return row;
+                });
+                myMatchedSoups = myMatchedSoups.concat(tmpMatchedSoups);
+              });
+              matchedSoups2 = myMatchedSoups;
+            } else {
+              var matchedSoups = _.where(soup, props);
+              matchedSoups2 = matchedSoups.map(function(el) {
+                var row = [];
+                if (selectFields == '*') {
+                  row = [el._soupEntryId];
+                  row.push(el);
+                } else {
+                  // filteredEl = {};
+                  selectFields.forEach(attr => row.push(el[attr]));
+                  // row.push(filteredEl);
+                }
+                return row;
+              });
+            }
           } else {
             // console.log('Running our like matches');
             soup.forEach(function(el) {
@@ -1838,8 +1899,17 @@ var MockSmartStore = (function(window) {
               });
               // console.log("matchFound", matchFound);
               if (matchFound) {
-                row = [el._soupEntryId];
-                row.push(el);
+                // row = [el._soupEntryId];
+                // row.push(el);
+                var row = [];
+                if (selectFields == '*') {
+                  row = [el._soupEntryId];
+                  row.push(el);
+                } else {
+                  // filteredEl = {};
+                  selectFields.forEach(attr => row.push(el[attr]));
+                  // row.push(filteredEl);
+                }
                 matchedSoups2.push(row);
               }
             });
@@ -1905,7 +1975,7 @@ var MockSmartStore = (function(window) {
           soupName = m[2];
           this.checkSoup(soupName);
 
-          var selectFields = m[1];
+          selectFields = m[1];
           //   console.log('selectFields', selectFields);
           if (selectFields !== '*') {
             selectFieldsArr = [];
@@ -1924,7 +1994,7 @@ var MockSmartStore = (function(window) {
           soup = JSON.parse(localStorage[soupName]);
           results = [];
           for (soupEntryId in soup) {
-            var row = [];
+            row = [];
 
             soupElt = soup[soupEntryId];
             if (selectFields == '*') {
@@ -2002,12 +2072,12 @@ var MockSmartStore = (function(window) {
     querySoup: function(soupName, querySpec) {
       if (navigator.appVersion.includes('Electron')) {
         // In electron
-        var results = ipcRenderer.sendSync('smartstore', {
+        let results = ipcRenderer.sendSync('smartstore', {
           method: 'querySoup',
           args: { table: soupName, querySpec: querySpec }
         });
-        var cursorId = _nextCursorId++;
-        var cursor = {
+        let cursorId = _nextCursorId++;
+        let cursor = {
           cursorId: cursorId,
           soupName: soupName,
           querySpec: querySpec,
@@ -2020,9 +2090,9 @@ var MockSmartStore = (function(window) {
         _cursors[cursorId] = cursor;
         return cursor;
       } else {
-        var results = this.querySoupFull(soupName, querySpec);
-        var cursorId = _nextCursorId++;
-        var cursor = {
+        let results = this.querySoupFull(soupName, querySpec);
+        let cursorId = _nextCursorId++;
+        let cursor = {
           cursorId: cursorId,
           soupName: soupName,
           querySpec: querySpec,
@@ -2197,7 +2267,7 @@ var myUrl = document.URL;
 var smartstore = cordova.require('com.salesforce.plugin.smartstore');
 if (myUrl.indexOf('scrub=true') > -1) {
   for (var i = 0; i < localStorage.length; i++) {
-    var name = localStorage.key(i);
+    let name = localStorage.key(i);
     if (name != 'forceOAuth') {
       smartstore.removeSoup(name);
     }
@@ -2205,7 +2275,7 @@ if (myUrl.indexOf('scrub=true') > -1) {
 }
 if (myUrl.indexOf('scrub=full') > -1) {
   for (var i = 0; i < localStorage.length; i++) {
-    var name = localStorage.key(i);
+    let name = localStorage.key(i);
     smartstore.removeSoup(name);
   }
 }
